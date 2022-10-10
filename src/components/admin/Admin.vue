@@ -1,7 +1,7 @@
 <template>
   <section class="constructor">
     <div class="bg"></div>
-    <div class="construction">
+    <div :class="{construction: true,pageStop: pageStopc}">
       <!-- 页面头部 -->
       <Header @adress="adress" @status="status" @client="client"></Header>
       <!-- 页面内容 -->
@@ -20,11 +20,23 @@ export default {
       MQTTAdress: "",
       MQTTStatus: false,
       MQTTClient: "",
+      pageStopc: false
     }
   },
   components: {
     Header,
     Content,
+  },
+  mounted() {
+    let that = this
+     window.onresize = function() {
+        let clientW = document.documentElement.clientWidth;
+        if (clientW < 900) {
+           that.pageStopc = true
+        }else {
+          that.pageStopc = false
+        }
+    }
   },
   methods: {
     adress(e) {
@@ -42,8 +54,8 @@ export default {
 
 <style lang="less">
 .constructor {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
   .bg {
     width: 100%;
     height: 100%;
@@ -65,6 +77,11 @@ export default {
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-between;
+  }
+  .pageStop {
+    width: 900px !important;
+    left:0 !important;
+    transform: translate(0, -50%) !important;
   }
 }
 </style>

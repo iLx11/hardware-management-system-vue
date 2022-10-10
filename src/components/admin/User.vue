@@ -83,7 +83,7 @@ export default {
           )
           if (res.code == 10021) {
             this.userLoad()
-            this.$message.info(res.massage)
+            this.$message.info("删除成功")
           } else {
             this.$message.info("删除失败")
           }
@@ -93,12 +93,18 @@ export default {
         })
     },
     changeMana(k) {
-      let that = this
-      conf("您确定要更改此用户的管理员权限吗", () => {
-        this.userList[k].mana
-          ? this.changeUser(1, 0, this.userList[k].name)
-          : this.changeUser(1, 1, this.userList[k].name)
+      this.$confirm("您确定要更改此用户的管理员权限吗", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
       })
+        .then(() => {
+          this.userList[k].mana
+            ? this.changeUser(1, 0, this.userList[k].name)
+            : this.changeUser(1, 1, this.userList[k].name)
+        })
+        .catch(() => {
+          this.$message.info("取消更改")
+        })
     },
     async changeUser(method = null, value = null, name = null) {
       const { data: res } = await this.$http.post("/users/" + method, {

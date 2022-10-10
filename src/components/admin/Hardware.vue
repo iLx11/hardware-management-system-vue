@@ -78,6 +78,7 @@ export default {
       showChangeh: false,
       showMask: false,
       state: true,
+      changeId: "",
     }
   },
   mounted() {
@@ -94,15 +95,7 @@ export default {
     },
     async hardwareLoad() {
       const { data: res } = await this.$http.get("/hardwares")
-      let HardwareList = res.data
-      let pattern1 = /^AGSW/
-      let pattern2 = /^SPSW/
-      this.AnaList = HardwareList.filter((o) => {
-        return pattern1.test(o.hardwareId)
-      })
-      this.SpList = HardwareList.filter((o) => {
-        return pattern2.test(o.hardwareId)
-      })
+      this.HardwareList = res.data
     },
     //硬件部分
     addHardware() {
@@ -123,6 +116,7 @@ export default {
       }
     },
     changeHardware(k) {
+      this.changeId = k
       this.showChangeh = true
       this.showMask = true
       this.state = false
@@ -146,14 +140,16 @@ export default {
       if (this.$refs.ccomp.formData != null) {
         this.showChangeh = false
         this.showMask = false
-        if (this.status) {
+        if (this.state) {
           console.log(this.status)
           this.addHardwareDo(this.$refs.ccomp.formData)
         } else {
-          this.changeHardwareDo(
-            this.HardwareList[k].id,
-            this.$refs.ccomp.formData
-          )
+          if (this.changeId != null) {
+            this.changeHardwareDo(
+              this.HardwareList[this.changeId].id,
+              this.$refs.ccomp.formData
+            )
+          }
         }
       } else {
         this.$message.warning("有输入框未填写哦")

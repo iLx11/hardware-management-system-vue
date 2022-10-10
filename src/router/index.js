@@ -7,6 +7,9 @@ import Control from '../components/admin/Control.vue'
 import User from '../components/admin/User.vue'
 import Hardware from '../components/admin/Hardware.vue'
 import Chart from '../components/admin/Chart.vue'
+import Mobile from '../components/mobile/Mobile.vue'
+import Mcontrol from '../components/mobile/Mcontrol.vue'
+
 
 Vue.use(VueRouter)
 
@@ -23,7 +26,7 @@ const routes = [
     {
       path: '/admin', component: Admin, children: [
         {
-          path: '/admin/', conponent: Control,
+          path: '/admin', redirect: '/admin/control',
         },
         {
           path: '/admin/control', component: Control
@@ -37,6 +40,25 @@ const routes = [
         {
           path: '/admin/chart', component: Chart
         }
+      ]
+    },
+    {
+      path: '/mobile', component: Mobile, children: [
+        {
+          path: '/mobile', redirect: '/mobile/control'
+        },
+        {
+          path: '/mobile/control', component: Mcontrol
+        },
+        // {
+        //   path: '/mobile/control', component: Mcontrol
+        // },
+        // {
+        //   path: '/mobile/control', component: Mcontrol
+        // },
+        // {
+        //   path: '/mobile/control', component: Mcontrol
+        // }
       ]
     }
 ]

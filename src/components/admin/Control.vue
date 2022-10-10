@@ -27,11 +27,11 @@
       </div>
       <div class="sysData">
         <div class="hNum">
-          <h1>{{hardwareLength}}</h1>
+          <h1>{{ hardwareLength }}</h1>
           <span>硬件数量</span>
         </div>
         <div class="uNum">
-          <h1>{{userLength}}</h1>
+          <h1>{{ userLength }}</h1>
           <span>用户数量</span>
         </div>
         <div class="MQTTStatus">
@@ -114,7 +114,7 @@ export default {
     this.hardwareLoad()
   },
   methods: {
-     async userLoad() {
+    async userLoad() {
       const { data: res } = await this.$http.get("/users")
       this.userLength = res.data.length
     },
@@ -146,25 +146,19 @@ export default {
       // })
     },
     //简单控制
-    SPSWControl(k, s) {
-//       let that = this
-//       let hardwareIP = "http://192.168.2.178"
-//       storage.save("hardwareIP", hardwareIP) //储存函数
+    async SPSWControl(k, s) {
+      let that = this
+      let hardwareIP = "http://192.168.2.178"
+      localStorage.setItem("hardwareIP", hardwareIP) //储存函数
 
-//       // storage.retrieve("hardwareIP") //读取函数
-//       $.ajax({
-//         type: "GET",
-//         url: storage.retrieve("hardwareIP") + "/spswControl",
-//         data: {
-//           name: that.HardwareList[k + that.AnaList.length].name,
-//           hardwareID: that.HardwareList[k + that.AnaList.length].hardwareID,
-//           hardwarePort: that.HardwareList[k + that.AnaList.length].hardwarePort,
-//           instruction: s,
-//         },
-//         success(res) {
-//           warn("发送成功")
-//         },
-//       })
+      let hIP = localStorage.getItem("hardwareIP") //读取函数
+      const { data: res } = await this.$http.get("hIP" + spswcontrol, {
+        name: this.SpList[k].name,
+        hardwareID: this.SpList[k].hardwareID,
+        hardwarePort: this.SpList[k].hardwarePort,
+        instruction: s,
+      })
+      this.$message.success(this.SpList[k].name + "操作成功")
     },
   },
 }

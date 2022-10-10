@@ -8,11 +8,19 @@
         <div class="messBox">
           <div class="from"><span>from</span></div>
           <div class="mes"><span>Message</span></div>
-          <div class="messBox messRight">
-            <div class="from"><span>{{topic}}</span></div>
-            <div class="mes"><span>{{content}}</span></div>
-          </div>
         </div>
+        <div
+            :key="v.id"
+            v-for="v in messBox"
+            :class="{ messBox: true,messRight: v.reverse }"
+          >
+            <div class="from">
+              <span>{{ v.topic }}</span>
+            </div>
+            <div class="mes">
+              <span>{{ v.message }}</span>
+            </div>
+          </div>
       </div>
     </div>
     <section>
@@ -68,23 +76,18 @@ export default {
       pubTopic: "",
       pubContent: "",
       subTopic: "",
-      messBox: [
-        {
-          topic: '',
-          message: '',
-          reverse: true,
-        },
-      ],
+      messBox: [],
     }
   },
   methods: {
     testConnect() {
+      let that = this
       if (this.$parent.MQTTStatus == true) {
         document.querySelector(".mqtt_send").onclick = function () {
-          that.pubTopic()
+          that.topicPub()
         }
         document.querySelector("#sub_t").onclick = function () {
-          that.subTopic()
+          that.topicSub()
         }
         document.querySelector("#unsub_t").onclick = function () {
           that.unsubTopic()
@@ -93,20 +96,21 @@ export default {
         this.$message.warning("MQTT服务器未连接")
       }
     },
-    pubTopic() {
+    topicPub() {
       if (this.pubTopic !== null && this.pubContent !== null) {
-        mqttClient.publish(topic, content)
+        mqttClient.publish(this.pubTopic, this.pubContent)
         //添加会话消息
-        $(".mqtt_mes").append(
-          `<div class="messBox messRight"><div class="from"><span>${topic}</span></div><div class="mes"><span>${content}</span></div></div>`
-        )
-
+        this.messBox.push({
+          topic: topic,
+          message: content,
+          reverse: true,
+        })
         this.$message.success("发布成功")
       } else {
         this.$$message.warning("发布主题和内容不能为空")
       }
     },
-    subTopic() {
+    topicSub() {
       if (this.subTopic != null && this.subTopic != null) {
         mqttClient.subscribe(this.subTopic, function (err) {
           if (!err) {
@@ -114,9 +118,11 @@ export default {
             //处理消息
             mqttClient.on("message", function (topic, message) {
               // 打印会话消息
-              $(".mqtt_mes").append(
-                `<div class="messBox"><div class="from"><span>${topic}</span></div><div class="mes"><span>${message.toString()}</span></div></div>`
-              )
+              this.messBox.push({
+                topic: topic,
+                message: content,
+                reverse: false,
+              })
               document.querySelector(".mMessage").scrollTop += 600
               document.querySelector(".mqtt_mes").scrollTop += 600
             })
@@ -130,7 +136,7 @@ export default {
     },
     unsubTopic() {
       if (this.subTopic != null && this.subTopic != "") {
-        mqttClient.unsubscribe(topic, (err) => {
+        mqttClient.unsubscribe(this.subTopic, (err) => {
           if (!err) {
             this.$message.success("取消订阅成功")
           }
