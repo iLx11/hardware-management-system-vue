@@ -203,6 +203,12 @@ export default {
 <style lang="less" scoped>
 /*公用结构开始*/
 /*-----------------------------------------------------------*/
+@bgcolor: rgba(255, 255, 255, 0.17);
+@bgcolor-1: rgba(231, 238, 238, 0.6);
+@bgshadow1: 3px 4px 12px 3px rgba(111, 109, 133, 0.2);
+@bgshadow2: 3px 4px 12px 3px rgba(111, 109, 133, 0.13);
+@font-color-1: rgba(76, 173, 174, 0.9);
+@font-color-2: rgba(51, 51, 51, 0.8);
 .state {
   display: inline-block;
 }
@@ -248,7 +254,7 @@ export default {
     left: 50%;
     margin-left: -40%;
     z-index: 5;
-    color: var(--font-color-1);
+    color: @font-color-1;
     box-shadow: 3px 4px 12px 3px rgba(111, 109, 133, 0.2);
     border-radius: 0 0 15px 15px;
     padding: 0.2em;
@@ -338,7 +344,7 @@ export default {
 
 .situation {
   width: 100%;
-  color: var(--font-color-1);
+  color: @font-color-1;
   position: absolute;
   z-index: 5;
   h1,
@@ -387,7 +393,7 @@ export default {
   width: 96%;
   height: 45%;
   border-radius: 7px 7px 15px 7px;
-  background-color: var(--bgcolor-1);
+  background-color: @bgcolor-1;
   /*background-image: linear-gradient(180deg, rgba(228, 200, 196, 0.7) 0%, rgba(181, 255, 252, 0.7) 100%);*/
   cursor: pointer;
   box-shadow: 3px 4px 12px 3px rgba(111, 109, 133, 0.03);
@@ -482,7 +488,7 @@ export default {
   left: 50%;
   margin-left: -25%;
   z-index: 5;
-  color: var(--font-color-1);
+  color: @font-color-1;
   border: 1.5px solid rgba(211, 215, 212, 0.8);
 
   box-shadow: 3px 4px 12px 3px rgba(111, 109, 133, 0.2);

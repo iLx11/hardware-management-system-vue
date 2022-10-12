@@ -7,6 +7,7 @@ module.exports = defineConfig({
   configureWebpack: {
     plugins: [new NodePolyfillPlugin()]
   },
+  //打包路径
   assetsDir: 'static',
   parallel: false,
   publicPath: './',

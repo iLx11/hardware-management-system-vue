@@ -2,12 +2,10 @@
   <section class="bottom_nav">
     <!-- <div class="glass_1"></div> -->
     <div class="font">
-      <div class="move_cube" :style="{left: cubeLeft}">
-        <p>control</p>
+      <div class="move_cube" :style="{ left: cubeLeft }">
+        <p>{{cubeName}}</p>
       </div>
-      <!-- 控制页面 -->
-
-      <div :key="v.id" v-for="v in navList">
+      <div :key="v.id" v-for="(v, k) in navList" @click="changeNav(k)">
         <router-link :to="v.path">
           <svg class="icon" aria-hidden="true">
             <use :xlink:href="v.href"></use>
@@ -22,7 +20,8 @@
 export default {
   data: function () {
     return {
-      cubeLeft: '',
+      cubeLeft: "",
+      cubeName: '',
       navList: [
         {
           id: 1,
@@ -34,34 +33,33 @@ export default {
         {
           id: 2,
           isActive: false,
-          name: "user",
+          name: "mqtt",
           href: "#icon-a-Diagramroot",
-          path: "/mobile/control",
+          path: "/mobile/mqtt",
         },
         {
           id: 3,
           isActive: false,
-          name: "hardware",
-          href: "#icon-a-Snippetchart",
-          path: "/mobile/control",
+          name: "mana",
+          href: "#icon-Pyramid",
+          path: "/mobile/mana",
         },
         {
           id: 4,
           isActive: false,
-          name: "chart",
-          href: "#icon-Pyramid",
-          path: "/mobile/control",
+          name: "user",
+          href: "#icon-a-Snippetchart",
+          path: "/mobile/user",
         },
       ],
     }
   },
   methods: {
-     navchange(k) {
-      this.navList[k].isActive = true
-     
-      
+    changeNav(k) {
+      this.cubeLeft = k * 25 + 4 + "%"
+      this.cubeName = this.navList[k].name
     },
-  }
+  },
 }
 </script>
 
@@ -98,13 +96,10 @@ export default {
   height: 85%;
   position: absolute;
   left: 4%;
-  /*left: 32%;*/
-  /*left: 57%;*/
-  /*left: 83%;*/
-  /*bottom: 7px;*/
   z-index: -1;
   border-radius: 12px;
   background: rgba(242, 222, 221, 0.9);
+  transition: 0.5s ease-in-out;
 }
 
 .move_cube p {

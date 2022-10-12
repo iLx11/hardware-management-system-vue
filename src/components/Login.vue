@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import {md5} from '../assets/js/md5.js'
+import { md5 } from "../assets/js/md5.js"
 export default {
   data: function () {
     return {
@@ -64,7 +64,12 @@ export default {
         )
         if (res.code == 10041) {
           this.$message.success("验证成功")
-          this.$router.push("/admin")
+          let clientW = document.documentElement.clientWidth
+          if (clientW > 600) {
+            this.$router.push("/admin")
+          } else {
+            this.$router.push("/mobile")
+          }
         } else {
           this.$message.warning("验证失败")
           setTimeout(() => {

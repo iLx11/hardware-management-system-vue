@@ -21,7 +21,7 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 header {
   height: 2em;
   background: rgba(0, 139, 139, 0.3);
