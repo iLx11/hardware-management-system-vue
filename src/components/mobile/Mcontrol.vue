@@ -62,13 +62,13 @@
     </section>
     <!-- 数据显示结束 -->
     <!------------------------------------------------------------>
-    <!-- 控制灯光开始 -->
+    <!-- 模拟控制开始 -->
     <section>
       <div class="content" :key="v.id" v-for="(v, k) in AnaList">
         <div class="C_t">
           <div class="ct ab">
             <div class="open led_open">
-              <div class="situation led_situation">
+              <div class="led_situation">
                 <h1>
                   {{ v.name }}:&nbsp;
                   <div class="state">Close</div>
@@ -76,7 +76,7 @@
                   <h4>success</h4>
                 </h1>
               </div>
-              <div @click="analogShow(k)" class="analog led_analog">
+              <div @click="analogShow(k, $event)" class="analog led_analog">
                 模拟调整
               </div>
             </div>
@@ -105,7 +105,7 @@
       </div>
     </section>
     <!------------------------------------------------------------>
-    <!-- 控制门开始 -->
+    <!-- 简单控制开始 -->
     <section>
       <div class="content" :key="v.id" v-for="(v, k) in SpList">
         <div class="C_t">
@@ -113,7 +113,7 @@
             <div class="con_open">
               <div class="con_situation">
                 <h1>
-                  {{ v.name }}<br/>
+                  {{ v.name }}<br />
                   <h4>
                     success&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="state">Close</div>
@@ -162,24 +162,26 @@ export default {
       let pattern2 = /^SPSW/
       this.AnaList = HardwareList.filter((o) => {
         return pattern1.test(o.hardwareId)
-      })
+      })  
       this.SpList = HardwareList.filter((o) => {
         return pattern2.test(o.hardwareId)
       })
     },
-        //模拟引脚显示
-    analogShow(k) {
+    //模拟引脚显示
+    analogShow(k, ev) {
+      ev.target.parentNode.parentNode.nextSibling.style.display = 'block';
+      let barIn = ev.target.parentNode.parentNode.nextSibling.children[0];
+      let indicator = ev.target.parentNode.parentNode.nextSibling.children[1].children[0];
       // let barIn = $(".bar-input").eq(k)[0]
-      // barIn.addEventListener("change", function () {
-      //   $(".ind")
-      //     .eq(k)
-      //     .html(barIn.value + "%")
-      // })
-      // barIn.addEventListener("mousemove", function () {
-      //   $(".ind")
-      //     .eq(k)
-      //     .html(barIn.value + "%")
-      // })
+      barIn.addEventListener("change", function () {
+        indicator.innerHTML = barIn.value + '%';
+        indicator.style.marginLeft = barIn.value + '%';
+      })
+      //实时改变
+      barIn.addEventListener("touchmove", function () {
+        indicator.innerHTML = barIn.value + '%';
+        indicator.style.marginLeft = barIn.value + '%';
+      })
     },
     //简单控制
     async SPSWControl(k, s) {
@@ -188,7 +190,7 @@ export default {
       localStorage.setItem("hardwareIP", hardwareIP) //储存函数
 
       let hIP = localStorage.getItem("hardwareIP") //读取函数
-      const { data: res } = await this.$http.get("hIP" + spswcontrol, {
+      const { data: res } = await this.$http.get(hIP + "/spswcontrol", {
         name: this.SpList[k].name,
         hardwareID: this.SpList[k].hardwareID,
         hardwarePort: this.SpList[k].hardwarePort,
@@ -342,13 +344,13 @@ export default {
   position: relative;
 }
 
-.situation {
+.led_situation {
   width: 100%;
-  color: @font-color-1;
-  position: absolute;
+  color: @font-color-2;
   z-index: 5;
   h1,
   h4 {
+    font-size: 16px;
     margin-left: 0.6em;
     margin-top: 0.4em;
   }
@@ -428,6 +430,7 @@ export default {
   width: 91.5%;
   margin: 0 auto;
   transform: translateY(27px);
+  background: rgba(0,0,0,0);
 }
 
 .indicator {
@@ -445,6 +448,7 @@ export default {
   margin-left: 100%;
   /*transform: translateY(15px);*/
   transform: translate(-3vh, 15px);
+  position: absolute;
 }
 
 .indicator:before {
@@ -490,12 +494,16 @@ export default {
   z-index: 5;
   color: @font-color-1;
   border: 1.5px solid rgba(211, 215, 212, 0.8);
-
   box-shadow: 3px 4px 12px 3px rgba(111, 109, 133, 0.2);
-
   border-radius: 0 0 15px 15px;
   padding: 0.2em;
   background-color: rgba(255, 255, 255, 0.8);
+  
+  h1,
+  h4 {
+    font-size: 16px;
+    color: rgba(51, 51, 51, 0.7);
+  }
 }
 
 .con_o {

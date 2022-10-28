@@ -5,7 +5,7 @@ import './plugins/element.js'
 import './assets/js/iconfontPC.js'
 import './assets/js/iconfont.js'
 import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:80/'
+axios.defaults.baseURL = '/api'
 Vue.prototype.$http = axios
 Vue.config.productionTip = false
 

@@ -78,6 +78,16 @@ export default {
        showMask: false,
     }
   },
+  mounted() {
+    this.current_user = this.getCookie("user")
+    if (this.currentUser != "" && this.currentUser != null) {
+      this.changeUser(2, 1, this.current_user)
+    }else {
+      this.$message.warning("用户未登录")
+      //跳转到登陆界面
+      // this.$router.push("/login")
+    }
+  },
   methods: {
     //用户退出
     exit() {
@@ -163,6 +173,8 @@ export default {
   padding: 0.5em;
   margin-bottom: 0.9em;
   background: rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+
 }
 
 .ct {
@@ -172,11 +184,14 @@ export default {
   justify-content: space-between;
   flex-flow: row wrap;
   position: relative;
+    overflow: hidden;
+
 }
 .user-content {
     width: 100%;
     height: 16em;
     border-radius: 30px;
+    overflow: hidden;
 }
 
 .current-user {
@@ -256,7 +271,7 @@ export default {
 .app_qb {
     width: 60%;
     height: 120px;
-    box-shadow: 0 0 0 2px darkgrey;
+    // box-shadow: 0 0 0 2px darkgrey;
     border-radius: 10px;
     float: left;
     background: url("../../assets/img/123.png")no-repeat;
@@ -282,8 +297,7 @@ export default {
     position: absolute;
     top: 20%;
     left: 10%;
-        transform: translate(-2%, -50%);
-
+    transform: translate(-2%, -50%);
     display: flex;
     justify-content: center;
     align-items: center;

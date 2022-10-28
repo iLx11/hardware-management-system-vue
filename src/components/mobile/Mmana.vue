@@ -99,12 +99,11 @@
     </div>
     <!-- 硬件列表显示 -->
     <section>
-      <ul id="hardware_list" v-show="showUserList">
+      <ul id="hardware_list" v-show="showHardwareList">
         <li class="user_l" :key="v.id" v-for="(v, k) in HardwareList">
           <div class="content">
             <div class="C_t">
               <div class="ct">
-                <div class="glass"></div>
                 <div class="hardware_data">
                   <div>
                     <h5>ID:</h5>
@@ -147,7 +146,7 @@
         </li>
       </ul>
       <!-- 用户列表显示 -->
-      <ul id="user_list" v-show="showHardwareList">
+      <ul id="user_list" v-show="showUserList">
         <li class="user_l" :key="v.id" v-for="(v, k) in userList">
           <div class="content">
             <div class="C_t">
@@ -520,7 +519,7 @@ export default {
   width: 100%;
   height: 4em;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
   justify-content: space-between;
 }
 
@@ -528,8 +527,15 @@ export default {
   width: 100%;
   height: 6em;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
   justify-content: space-between;
+}
+.user_data>div,.hardware_data>div{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
 }
 
 .user_data h3,
@@ -570,5 +576,9 @@ p {
 
 .mana_c .icon {
   font-size: 13px;
+}
+.zhanwei {
+  width: 100%;
+  height: 100px;
 }
 </style>
