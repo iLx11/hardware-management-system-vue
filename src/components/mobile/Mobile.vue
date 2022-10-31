@@ -2,7 +2,7 @@
   <section class="m-constructor">
     <header>iLx1</header>
     <section class="m-content">
-      <router-view></router-view>
+      <router-view ref="component" @address="address" @status="status" @client="client"></router-view>
     </section>
     <Bnav></Bnav>
   </section>
@@ -13,10 +13,27 @@ import Bnav from "./Bnav.vue"
 
 export default {
   data: function () {
-    return {}
+    return {
+      MQTTAddress: "",
+      MQTTStatus: false,
+      MQTTClient: "",
+    }
+  },
+  mounted() {
   },
   components: {
     Bnav,
+  },
+  methods: {
+    address(e) {
+      this.MQTTAddress = e
+    },
+    status(e) {
+      this.MQTTStatus = e
+    },
+    client(e) {
+      this.MQTTClient = e
+    },
   },
 }
 </script>

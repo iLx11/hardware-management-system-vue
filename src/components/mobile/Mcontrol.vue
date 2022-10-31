@@ -51,6 +51,8 @@
                     name=""
                     placeholder="mqtt server address"
                     id="mqt"
+                    v-model="mqttInp"
+                    @blur="MQTTConnect"
                   />
                 </div>
                 <p id="mqtt_sit" style="font-size: 5px">CONNECTED</p>
@@ -81,10 +83,10 @@
               </div>
             </div>
             <div class="switch led_switch">
-              <div class="o_n led_on">
+              <div class="o_n led_on" @click="AnaSwitch(k, 'open')">
                 <h4>打开</h4>
               </div>
-              <div class="o_ff led_off">
+              <div class="o_ff led_off" @click="AnaSwitch(k, 'close')">
                 <h4>关闭</h4>
               </div>
             </div>
@@ -143,17 +145,47 @@
 </template>
 
 <script>
+import mqtt from "mqtt"
 export default {
   data: function () {
     return {
       AnaList: [],
       SpList: [],
+      mqttInp: "",
+      options: {
+        //mqtt客户端id
+        // clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
+        clientId: '75ee4e39450943889749e9924e3a982c',
+        // connectTimeout: 3,
+      }
     }
   },
   mounted() {
     this.hardwareLoad()
   },
   methods: {
+    // 连接MQTT服务器
+    MQTTConnect() {
+      console.log("123123")
+      if (this.mqttInp == null || this.mqttInp == "") {
+        this.$message.warning("服务器地址为空")
+      } else {
+        //给父组件传值
+        this.$emit("address", this.mqttInp)
+        let client = mqtt.connect(this.mqttInp, this.options)
+        client.on("connect", () => {
+          // 给父组件传状态
+          this.$emit("status", true)
+          //给父组件传对象
+          this.$emit("client", client)
+          this.$message.success("连接成功")
+        })
+        client.on("error", (err) => {
+          this.$message.error("连接失败")
+          client.end()
+        })
+      }
+    },
     async hardwareLoad() {
       const { data: res } = await this.$http.get("/hardwares")
       this.hardwareLength = res.data.length
@@ -162,39 +194,61 @@ export default {
       let pattern2 = /^SPSW/
       this.AnaList = HardwareList.filter((o) => {
         return pattern1.test(o.hardwareId)
-      })  
+      })
       this.SpList = HardwareList.filter((o) => {
         return pattern2.test(o.hardwareId)
       })
     },
     //模拟引脚显示
     analogShow(k, ev) {
-      ev.target.parentNode.parentNode.nextSibling.style.display = 'block';
-      let barIn = ev.target.parentNode.parentNode.nextSibling.children[0];
-      let indicator = ev.target.parentNode.parentNode.nextSibling.children[1].children[0];
+      ev.target.parentNode.parentNode.nextSibling.style.display = "block"
+      let barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
+      let indicator =
+        ev.target.parentNode.parentNode.nextSibling.children[1].children[0]
       // let barIn = $(".bar-input").eq(k)[0]
       barIn.addEventListener("change", function () {
-        indicator.innerHTML = barIn.value + '%';
-        indicator.style.marginLeft = barIn.value + '%';
+        indicator.innerHTML = barIn.value + "%"
+        indicator.style.marginLeft = barIn.value + "%"
+        this.AnaGet(k, null, barIn.value)
       })
       //实时改变
       barIn.addEventListener("touchmove", function () {
-        indicator.innerHTML = barIn.value + '%';
-        indicator.style.marginLeft = barIn.value + '%';
+        indicator.innerHTML = barIn.value + "%"
+        indicator.style.marginLeft = barIn.value + "%"
+        this.AnaGet(k, null, barIn.value)
+      })
+    },
+    //模拟控制硬件简单控制
+    AnaSwitch(k, ins) {
+      this.AnaGet(k, ins)
+      console.log(this.AnaList[k].hardwareId.substring(4))
+    },
+    async AnaGet(k, ins = "none", pwm = 0) {
+      const { data: res } = await this.$http.get("/agswcontrol", {
+        params: {
+          name: this.AnaList[k].name,
+          hardwareId: this.AnaList[k].hardwareId,
+          hardwarePort: this.AnaList[k].hardwarePort,
+          instruction: ins,
+          pwm: pwm,
+          num: this.AnaList[k].hardwareId.substring(4),
+        },
       })
     },
     //简单控制
-    async SPSWControl(k, s) {
-      let that = this
-      let hardwareIP = "http://192.168.2.178"
+    async SPSWControl(k, ins) {
+      let hardwareIP = "http://192.168.0.114"
       localStorage.setItem("hardwareIP", hardwareIP) //储存函数
-
+      // 读取硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
       const { data: res } = await this.$http.get(hIP + "/spswcontrol", {
-        name: this.SpList[k].name,
-        hardwareID: this.SpList[k].hardwareID,
-        hardwarePort: this.SpList[k].hardwarePort,
-        instruction: s,
+        params: {
+          name: this.SpList[k].name,
+          hardwareId: this.SpList[k].hardwareId,
+          hardwarePort: this.SpList[k].hardwarePort,
+          instruction: ins,
+          message: "你好啊",
+        },
       })
       this.$message.success(this.SpList[k].name + "操作成功")
     },
@@ -430,7 +484,7 @@ export default {
   width: 91.5%;
   margin: 0 auto;
   transform: translateY(27px);
-  background: rgba(0,0,0,0);
+  background: rgba(0, 0, 0, 0);
 }
 
 .indicator {
@@ -498,7 +552,7 @@ export default {
   border-radius: 0 0 15px 15px;
   padding: 0.2em;
   background-color: rgba(255, 255, 255, 0.8);
-  
+
   h1,
   h4 {
     font-size: 16px;

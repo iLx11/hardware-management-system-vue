@@ -79,13 +79,19 @@ export default {
       pubTopic: "",
       pubContent: "",
       subTopic: "",
+      MQTTAddress: "",
+      MQTTStatus: false,
+      MQTTClient: "",
       messBox: [],
     }
   },
   methods: {
     testConnect() {
       let that = this
-      if (this.$parent.MQTTStatus == true) {
+      this.MQTTAddress = this.$parent.MQTTAddress
+      this.MQTTStatus = this.$parent.MQTTStatus
+      this.MQTTClient = this.$parent.MQTTClient
+      if (this.MQTTStatus == true) {
         document.querySelector(".mqtt_send").onclick = function () {
           that.topicPub()
         }
@@ -101,32 +107,32 @@ export default {
     },
     topicPub() {
       if (this.pubTopic !== null && this.pubContent !== null) {
-        mqttClient.publish(this.pubTopic, this.pubContent)
+        this.MQTTClient.publish(this.pubTopic, this.pubContent)
         //添加会话消息
         this.messBox.push({
-          topic: topic,
-          message: content,
+          topic: this.pubTopic,
+          message: this.pubContent,
           reverse: true,
         })
         this.$message.success("发布成功")
       } else {
-        this.$$message.warning("发布主题和内容不能为空")
+        this.$message.warning("发布主题和内容不能为空")
       }
     },
     topicSub() {
+      let that = this
       if (this.subTopic != null && this.subTopic != null) {
-        mqttClient.subscribe(this.subTopic, function (err) {
+        this.MQTTClient.subscribe(this.subTopic, (err) => {
           if (!err) {
             this.$message.success("订阅成功")
             //处理消息
-            mqttClient.on("message", function (topic, message) {
+            this.MQTTClient.on("message", function (topic, message) {
               // 打印会话消息
-              this.messBox.push({
+              that.messBox.push({
                 topic: topic,
-                message: content,
+                message: message,
                 reverse: false,
               })
-              document.querySelector(".mMessage").scrollTop += 600
               document.querySelector(".mqtt_mes").scrollTop += 600
             })
           } else {
@@ -139,7 +145,7 @@ export default {
     },
     unsubTopic() {
       if (this.subTopic != null && this.subTopic != "") {
-        mqttClient.unsubscribe(this.subTopic, (err) => {
+        this.MQTTClient.unsubscribe(this.subTopic, (err) => {
           if (!err) {
             this.$message.success("取消订阅成功")
           }

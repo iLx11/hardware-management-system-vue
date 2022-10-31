@@ -1,10 +1,12 @@
 <template>
   <section class="kalada_m_c">
+    <!-- 页面遮罩 -->
+    <div v-show="showMask" class="cover" @click="maskHide"></div>
     <!-- 修改硬件 -->
     <div class="content conH changeH" v-show="showChangeHardware">
       <div class="C_t">
         <div class="ct">
-          <div class="con_hardware">
+          <div class="con_hardware change-hw">
             <form :model="formDataAlter">
               <div>
                 <h5>硬件名:</h5>
@@ -28,8 +30,10 @@
                 <h5>硬件ID:</h5>
                 <div class="hw_sub">
                   <select v-model="formDataAlter.hardwareId" class="h_inp">
-                    <option value="AGSW01">AGSW01</option>
-                    <option value="SPSW01">SPSW01</option>
+                    <option value="AGSW01">灯光</option>
+                    <option value="AGSW11">舵机</option>
+                    <option value="SPSW01">继电器</option>
+                    <option value="SPSW11">步进电机</option>
                   </select>
                   <div @click="changeHardwareDo" class="conH_sub changeH_sub">
                     修改
@@ -45,10 +49,18 @@
       <div class="C_t">
         <div class="ct">
           <div class="mana_nav">
-            <div class="user_nav" :class="{active_color: !activeColor}" @click="showUL">
+            <div
+              class="user_nav"
+              :class="{ active_color: !activeColor }"
+              @click="showUL"
+            >
               <h1>User</h1>
             </div>
-            <div class="hardware_nav" :class="{active_color: activeColor}" @click="showHL">
+            <div
+              class="hardware_nav"
+              :class="{ active_color: activeColor }"
+              @click="showHL"
+            >
               <h1>Hardware</h1>
             </div>
             <div class="addHardware" v-show="showAddBox" @click="showBox">
@@ -86,8 +98,10 @@
                 <h5>硬件ID:</h5>
                 <div class="hw_sub">
                   <select v-model="formDataAdd.hardwareId" class="addh_inp">
-                    <option value="AGSW01">AGSW01</option>
-                    <option value="SWSW01">SWSW01</option>
+                    <option value="AGSW01">灯光</option>
+                    <option value="AGSW11">舵机</option>
+                    <option value="SPSW01">继电器</option>
+                    <option value="SPSW11">步进电机</option>
                   </select>
                   <div @click="addHardware" class="conH_sub addH_sub">添加</div>
                 </div>
@@ -208,6 +222,7 @@ export default {
       showAddBox: false,
       showAddHardware: false,
       showChangeHardware: false,
+      showMask: false,
       activeColor: false,
       currentId: "",
       formDataAlter: {
@@ -322,6 +337,9 @@ export default {
     changeHardware(k) {
       this.showChangeHardware = true
       this.currentId = k
+      this.formDataAlter.hardwareName = this.HardwareList[k].name
+      this.formDataAlter.hardwareId = this.HardwareList[k].hardwareId
+      this.formDataAlter.hardwarePort = this.HardwareList[k].hardwarePort
     },
     async changeHardwareDo() {
       if (this.formDataAlter != null && this.formDataAlter != "") {
@@ -502,14 +520,19 @@ export default {
   background: rgba(233, 240, 240, 0.7) !important;
 }
 .changeH {
+  width: 97%;
+  height: 20%;
   position: fixed;
   top: 25%;
   left: 50%;
-  margin-left: -46.5%;
-  background: rgba(255, 255, 255, 1);
+  transform: translateX(-50%);
   z-index: 66;
 }
-
+.change-hw {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 1);
+}
 .hw_sub {
   display: flex;
   justify-content: space-between;
@@ -530,7 +553,8 @@ export default {
   flex-flow: column nowrap;
   justify-content: space-between;
 }
-.user_data>div,.hardware_data>div{
+.user_data > div,
+.hardware_data > div {
   width: 100%;
   height: 100%;
   display: flex;
@@ -580,5 +604,15 @@ p {
 .zhanwei {
   width: 100%;
   height: 100px;
+}
+/*遮罩*/
+.cover {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(51, 51, 51, 0.4);
+  z-index: 65;
 }
 </style>

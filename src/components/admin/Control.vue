@@ -132,7 +132,7 @@ export default {
       })
     },
     //模拟引脚显示
-    analogShow(k) {
+    analogShow(k, ev) {
       // let barIn = $(".bar-input").eq(k)[0]
       // barIn.addEventListener("change", function () {
       //   $(".ind")

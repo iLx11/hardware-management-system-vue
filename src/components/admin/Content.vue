@@ -7,7 +7,7 @@
       <router-view></router-view>
     </div>
     <!-- MQTT组件 -->
-    <Mqtt></Mqtt>
+    <Mqtt ref="mqtt"></Mqtt>
   </section>
 </template>
 

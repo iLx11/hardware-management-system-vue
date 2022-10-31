@@ -3,9 +3,9 @@
     <div class="bg"></div>
     <div :class="{construction: true,pageStop: pageStopc}">
       <!-- 页面头部 -->
-      <Header @adress="adress" @status="status" @client="client"></Header>
+      <Header @address="address" @status="status" @client="client"></Header>
       <!-- 页面内容 -->
-      <Content></Content>
+      <Content ref="content"></Content>
     </div>
   </section>
 </template>
@@ -17,9 +17,6 @@ import Content from "./Content.vue"
 export default {
   data: function () {
     return {
-      MQTTAdress: "",
-      MQTTStatus: false,
-      MQTTClient: "",
       pageStopc: false
     }
   },
@@ -37,16 +34,17 @@ export default {
           that.pageStopc = false
         }
     }
+    console.log(this.$refs.content.$refs.mqtt.messBox)
   },
   methods: {
-    adress(e) {
-      this.MQTTAdress = e
+    address(e) {
+      this.$refs.content.$refs.mqtt.MQTTAdress = e
     },
     status(e) {
-      this.MQTTStatus = e
+      this.$refs.content.$refs.mqtt.MQTTStatus = e
     },
     client(e) {
-      this.MQTTClient = e
+      this.$refs.content.$refs.mqtt.MQTTClient = e
     },
   },
 }
