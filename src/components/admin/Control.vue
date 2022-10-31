@@ -55,10 +55,10 @@
               <!-- <div @click="analogShow(k)" class="analog led_analog">模拟调整</div> -->
             </div>
             <div class="switch">
-              <div class="o_n">
+              <div class="o_n" @click="AnaSwitch(k, 'open')">
                 <h4>打开</h4>
               </div>
-              <div class="o_ff">
+              <div class="o_ff" @click="AnaSwitch(k, 'close')">
                 <h4>关闭</h4>
               </div>
             </div>
@@ -133,30 +133,67 @@ export default {
     },
     //模拟引脚显示
     analogShow(k, ev) {
-      // let barIn = $(".bar-input").eq(k)[0]
-      // barIn.addEventListener("change", function () {
-      //   $(".ind")
-      //     .eq(k)
-      //     .html(barIn.value + "%")
-      // })
-      // barIn.addEventListener("mousemove", function () {
-      //   $(".ind")
-      //     .eq(k)
-      //     .html(barIn.value + "%")
-      // })
+     let that = this
+      if (ev.target.parentNode.parentNode.nextSibling.style.display == "none") {
+        ev.target.parentNode.parentNode.nextSibling.style.display = "block"
+        let barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
+        let indicator =
+          ev.target.parentNode.parentNode.nextSibling.children[1].children[0]
+        // let barIn = $(".bar-input").eq(k)[0]
+        barIn.addEventListener("change", function () {
+          indicator.innerHTML = barIn.value + "%"
+          indicator.style.marginLeft = barIn.value + "%"
+          that.AnaGet(k, "pwm", barIn.value)
+        })
+        //实时改变
+        barIn.addEventListener("touchmove", function () {
+          indicator.innerHTML = barIn.value + "%"
+          indicator.style.marginLeft = barIn.value + "%"
+          that.AnaGet(k, "pwm", barIn.value)
+        })
+      } else {
+        ev.target.parentNode.parentNode.nextSibling.style.display = "none"
+        barIn.removeEventListener("click")
+        barIn.removeEventListener("change")
+      }
+    },
+     //模拟控制硬件简单控制
+    AnaSwitch(k, ins) {
+      this.AnaGet(k, ins)
+      console.log(ins)
+      console.log(this.AnaList[k].hardwareId.substring(4))
+    },
+    async AnaGet(k, ins, pwm = 0) {
+      let hardwareIP = "http://192.168.0.111"
+      localStorage.setItem("hardwareIP", hardwareIP) //储存函数
+      // 读取硬件8266IP
+      let hIP = localStorage.getItem("hardwareIP") //读取函数
+      let num = this.AnaList[k].hardwareId.substring(4)
+      const { data: res } = await this.$http.get(hIP + "/agswcontrol" + num, {
+        params: {
+          // name: this.AnaList[k].name,
+          // hardwareId: this.AnaList[k].hardwareId,
+          hardwarePort: this.AnaList[k].hardwarePort,
+          instruction: ins,
+          pwm: pwm
+        },
+      })
     },
     //简单控制
     async SPSWControl(k, s) {
-      let that = this
-      let hardwareIP = "http://192.168.2.178"
+       let hardwareIP = "http://192.168.0.111"
       localStorage.setItem("hardwareIP", hardwareIP) //储存函数
-
+      // 读取硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
-      const { data: res } = await this.$http.get("hIP" + spswcontrol, {
-        name: this.SpList[k].name,
-        hardwareID: this.SpList[k].hardwareID,
-        hardwarePort: this.SpList[k].hardwarePort,
-        instruction: s,
+      let num = this.AnaList[k].hardwareId.substring(4)
+      const { data: res } = await this.$http.get(hIP + "/spswcontrol" + num, {
+        params: {
+          // name: this.SpList[k].name,
+          // hardwareId: this.SpList[k].hardwareId,
+          hardwarePort: this.SpList[k].hardwarePorts,
+          instruction: ins,
+          message: "你好啊",
+        },
       })
       this.$message.success(this.SpList[k].name + "操作成功")
     },

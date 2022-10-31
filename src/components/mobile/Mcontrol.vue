@@ -155,9 +155,9 @@ export default {
       options: {
         //mqtt客户端id
         // clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
-        clientId: '75ee4e39450943889749e9924e3a982c',
+        clientId: "75ee4e39450943889749e9924e3a982c",
         // connectTimeout: 3,
-      }
+      },
     }
   },
   mounted() {
@@ -201,51 +201,64 @@ export default {
     },
     //模拟引脚显示
     analogShow(k, ev) {
-      ev.target.parentNode.parentNode.nextSibling.style.display = "block"
-      let barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
-      let indicator =
-        ev.target.parentNode.parentNode.nextSibling.children[1].children[0]
-      // let barIn = $(".bar-input").eq(k)[0]
-      barIn.addEventListener("change", function () {
-        indicator.innerHTML = barIn.value + "%"
-        indicator.style.marginLeft = barIn.value + "%"
-        this.AnaGet(k, null, barIn.value)
-      })
-      //实时改变
-      barIn.addEventListener("touchmove", function () {
-        indicator.innerHTML = barIn.value + "%"
-        indicator.style.marginLeft = barIn.value + "%"
-        this.AnaGet(k, null, barIn.value)
-      })
+      let that = this
+      if (ev.target.parentNode.parentNode.nextSibling.style.display == "none") {
+        ev.target.parentNode.parentNode.nextSibling.style.display = "block"
+        let barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
+        let indicator =
+          ev.target.parentNode.parentNode.nextSibling.children[1].children[0]
+        // let barIn = $(".bar-input").eq(k)[0]
+        barIn.addEventListener("change", function () {
+          indicator.innerHTML = barIn.value + "%"
+          indicator.style.marginLeft = barIn.value + "%"
+          that.AnaGet(k, "pwm", barIn.value)
+        })
+        //实时改变
+        barIn.addEventListener("touchmove", function () {
+          indicator.innerHTML = barIn.value + "%"
+          indicator.style.marginLeft = barIn.value + "%"
+          that.AnaGet(k, "pwm", barIn.value)
+        })
+      } else {
+        ev.target.parentNode.parentNode.nextSibling.style.display = "none"
+        barIn.removeEventListener("click")
+        barIn.removeEventListener("change")
+      }
     },
     //模拟控制硬件简单控制
     AnaSwitch(k, ins) {
       this.AnaGet(k, ins)
+      console.log(ins)
       console.log(this.AnaList[k].hardwareId.substring(4))
     },
-    async AnaGet(k, ins = "none", pwm = 0) {
-      const { data: res } = await this.$http.get("/agswcontrol", {
+    async AnaGet(k, ins, pwm = 0) {
+      let hardwareIP = "http://192.168.0.111"
+      localStorage.setItem("hardwareIP", hardwareIP) //储存函数
+      // 读取硬件8266IP
+      let hIP = localStorage.getItem("hardwareIP") //读取函数
+      let num = this.AnaList[k].hardwareId.substring(4)
+      const { data: res } = await this.$http.get(hIP + "/agswcontrol" + num, {
         params: {
-          name: this.AnaList[k].name,
-          hardwareId: this.AnaList[k].hardwareId,
+          // name: this.AnaList[k].name,
+          // hardwareId: this.AnaList[k].hardwareId,
           hardwarePort: this.AnaList[k].hardwarePort,
           instruction: ins,
-          pwm: pwm,
-          num: this.AnaList[k].hardwareId.substring(4),
+          pwm: pwm
         },
       })
     },
     //简单控制
     async SPSWControl(k, ins) {
-      let hardwareIP = "http://192.168.0.114"
+      let hardwareIP = "http://192.168.0.111"
       localStorage.setItem("hardwareIP", hardwareIP) //储存函数
       // 读取硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
-      const { data: res } = await this.$http.get(hIP + "/spswcontrol", {
+      let num = this.AnaList[k].hardwareId.substring(4)
+      const { data: res } = await this.$http.get(hIP + "/spswcontrol" + num, {
         params: {
-          name: this.SpList[k].name,
-          hardwareId: this.SpList[k].hardwareId,
-          hardwarePort: this.SpList[k].hardwarePort,
+          // name: this.SpList[k].name,
+          // hardwareId: this.SpList[k].hardwareId,
+          hardwarePort: this.SpList[k].hardwarePorts,
           instruction: ins,
           message: "你好啊",
         },
@@ -263,7 +276,7 @@ export default {
 @bgcolor-1: rgba(231, 238, 238, 0.6);
 @bgshadow1: 3px 4px 12px 3px rgba(111, 109, 133, 0.2);
 @bgshadow2: 3px 4px 12px 3px rgba(111, 109, 133, 0.13);
-@font-color-1: rgba(76, 173, 174, 0.9);
+@font-color-1: rgba(130, 174, 175, 0.9);
 @font-color-2: rgba(51, 51, 51, 0.8);
 .state {
   display: inline-block;
