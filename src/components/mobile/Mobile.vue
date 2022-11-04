@@ -1,6 +1,6 @@
 <template>
   <section class="m-constructor">
-    <header>iLx1</header>
+    <header>hw</header>
     <section class="m-content">
       <router-view ref="component" @address="address" @status="status" @client="client"></router-view>
     </section>

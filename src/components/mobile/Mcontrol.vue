@@ -162,6 +162,8 @@ export default {
   },
   mounted() {
     this.hardwareLoad()
+    let hardwareIP = "http://192.168.0.110"
+    localStorage.setItem("hardwareIP", hardwareIP) //储存函数
   },
   methods: {
     // 连接MQTT服务器
@@ -232,8 +234,6 @@ export default {
       console.log(this.AnaList[k].hardwareId.substring(4))
     },
     async AnaGet(k, ins, pwm = 0) {
-      let hardwareIP = "http://192.168.0.111"
-      localStorage.setItem("hardwareIP", hardwareIP) //储存函数
       // 读取硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
       let num = this.AnaList[k].hardwareId.substring(4)
@@ -243,24 +243,31 @@ export default {
           // hardwareId: this.AnaList[k].hardwareId,
           hardwarePort: this.AnaList[k].hardwarePort,
           instruction: ins,
-          pwm: pwm
+          pwm: pwm,
         },
       })
     },
     //简单控制
     async SPSWControl(k, ins) {
-      let hardwareIP = "http://192.168.0.111"
-      localStorage.setItem("hardwareIP", hardwareIP) //储存函数
       // 读取硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
-      let num = this.AnaList[k].hardwareId.substring(4)
+      let num = this.SpList[k].hardwareId.substring(4)
+       let json = {
+          hardwarePort: this.SpList[k].hardwarePort,
+          instruction: ins,
+          num: ""
+        }
+      if (num == "02" || num == "03") {
+        json.num = "relay"
+      }else {
+        json.num = "motor"
+      }
+
       const { data: res } = await this.$http.get(hIP + "/spswcontrol" + num, {
         params: {
           // name: this.SpList[k].name,
           // hardwareId: this.SpList[k].hardwareId,
-          hardwarePort: this.SpList[k].hardwarePorts,
-          instruction: ins,
-          message: "你好啊",
+          jsonData: JSON.stringify(json),
         },
       })
       this.$message.success(this.SpList[k].name + "操作成功")

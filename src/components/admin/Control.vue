@@ -112,6 +112,8 @@ export default {
   mounted() {
     this.userLoad()
     this.hardwareLoad()
+    let hardwareIP = "http://192.168.0.111"
+    localStorage.setItem("hardwareIP", hardwareIP) //储存函数
   },
   methods: {
     async userLoad() {
@@ -133,7 +135,7 @@ export default {
     },
     //模拟引脚显示
     analogShow(k, ev) {
-     let that = this
+      let that = this
       if (ev.target.parentNode.parentNode.nextSibling.style.display == "none") {
         ev.target.parentNode.parentNode.nextSibling.style.display = "block"
         let barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
@@ -157,15 +159,13 @@ export default {
         barIn.removeEventListener("change")
       }
     },
-     //模拟控制硬件简单控制
+    //模拟控制硬件简单控制
     AnaSwitch(k, ins) {
       this.AnaGet(k, ins)
       console.log(ins)
       console.log(this.AnaList[k].hardwareId.substring(4))
     },
     async AnaGet(k, ins, pwm = 0) {
-      let hardwareIP = "http://192.168.0.111"
-      localStorage.setItem("hardwareIP", hardwareIP) //储存函数
       // 读取硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
       let num = this.AnaList[k].hardwareId.substring(4)
@@ -175,14 +175,12 @@ export default {
           // hardwareId: this.AnaList[k].hardwareId,
           hardwarePort: this.AnaList[k].hardwarePort,
           instruction: ins,
-          pwm: pwm
+          pwm: pwm,
         },
       })
     },
     //简单控制
     async SPSWControl(k, s) {
-       let hardwareIP = "http://192.168.0.111"
-      localStorage.setItem("hardwareIP", hardwareIP) //储存函数
       // 读取硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
       let num = this.AnaList[k].hardwareId.substring(4)

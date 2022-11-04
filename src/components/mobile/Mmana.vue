@@ -32,8 +32,10 @@
                   <select v-model="formDataAlter.hardwareId" class="h_inp">
                     <option value="AGSW01">灯光</option>
                     <option value="AGSW11">舵机</option>
-                    <option value="SPSW01">继电器</option>
-                    <option value="SPSW11">步进电机</option>
+                    <option value="SPSW02">继电器2</option>
+                    <option value="SPSW12">步进电机2</option>
+                    <option value="SPSW03">继电器3</option>
+                    <option value="SPSW13">步进电机3</option>
                   </select>
                   <div @click="changeHardwareDo" class="conH_sub changeH_sub">
                     修改
@@ -100,8 +102,10 @@
                   <select v-model="formDataAdd.hardwareId" class="addh_inp">
                     <option value="AGSW01">灯光</option>
                     <option value="AGSW11">舵机</option>
-                    <option value="SPSW01">继电器</option>
-                    <option value="SPSW11">步进电机</option>
+                    <option value="SPSW02">继电器2</option>
+                    <option value="SPSW12">步进电机2</option>
+                    <option value="SPSW03">继电器3</option>
+                    <option value="SPSW13">步进电机3</option>
                   </select>
                   <div @click="addHardware" class="conH_sub addH_sub">添加</div>
                 </div>
