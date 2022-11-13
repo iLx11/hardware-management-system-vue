@@ -249,7 +249,7 @@ export default {
     },
     //简单控制
     async SPSWControl(k, ins) {
-      // 读取硬件8266IP
+      // 读取@硬件8266IP
       let hIP = localStorage.getItem("hardwareIP") //读取函数
       let num = this.SpList[k].hardwareId.substring(4)
        let json = {

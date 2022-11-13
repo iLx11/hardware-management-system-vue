@@ -319,6 +319,7 @@ export default {
     maskHide() {
       this.showChangeh = false
       this.showMask = false
+      this.showChangeHardware = false
     },
     async hardwareLoad() {
       const { data: res } = await this.$http.get("/hardwares")
@@ -340,7 +341,9 @@ export default {
     },
     changeHardware(k) {
       this.showChangeHardware = true
+      this.showMask = true
       this.currentId = k
+      console.log(this.currentId)
       this.formDataAlter.hardwareName = this.HardwareList[k].name
       this.formDataAlter.hardwareId = this.HardwareList[k].hardwareId
       this.formDataAlter.hardwarePort = this.HardwareList[k].hardwarePort
@@ -348,7 +351,7 @@ export default {
     async changeHardwareDo() {
       if (this.formDataAlter != null && this.formDataAlter != "") {
         const { data: res } = await this.$http.put("/hardwares", {
-          id: this.currentId,
+          id: this.currentId + 1,
           name: this.formDataAlter.hardwareName,
           hardwareId: this.formDataAlter.hardwareId,
           hardwarePort: this.formDataAlter.hardwarePort,
@@ -613,7 +616,7 @@ p {
 .cover {
   width: 100%;
   height: 100%;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   background: rgba(51, 51, 51, 0.4);

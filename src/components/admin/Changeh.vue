@@ -8,17 +8,31 @@
         <form :model="formData">
           <div>
             <h5>硬件名:</h5>
-            <input v-model.trim="formData.hardwareName" class="h_inp" type="text" name="" />
+            <input
+              v-model.trim="formData.hardwareName"
+              class="h_inp"
+              type="text"
+              name=""
+            />
           </div>
           <div>
             <h5>硬件port:</h5>
-            <input v-model.trim="formData.hardwarePort" class="h_inp" type="text" name="" />
+            <input
+              v-model.trim="formData.hardwarePort"
+              class="h_inp"
+              type="text"
+              name=""
+            />
           </div>
           <div>
             <h5>硬件ID:</h5>
             <select v-model.trim="formData.hardwareId" class="h_inp">
-              <option value="AGSW01">AGSW01</option>
-              <option value="SPSW01">SPSW01</option>
+              <option value="AGSW01">灯光</option>
+              <option value="AGSW11">舵机</option>
+              <option value="SPSW02">继电器2</option>
+              <option value="SPSW12">步进电机2</option>
+              <option value="SPSW03">继电器3</option>
+              <option value="SPSW13">步进电机3</option>
             </select>
           </div>
         </form>
@@ -35,10 +49,10 @@ export default {
   data: function () {
     return {
       formData: {
-        hardwareName: '23',
-        hardwarePort: '',
-        hardwareId: '',
-      }
+        hardwareName: "23",
+        hardwarePort: "",
+        hardwareId: "",
+      },
     }
   },
   props: ["showChangeh", "showMask"],
