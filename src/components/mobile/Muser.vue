@@ -58,6 +58,7 @@
         viewBox="0 0 32 32"
         width="32px"
         height="32px"
+        @click="subChange"
       >
         <path
           d="M 9 6 C 5.6983746 6 3 8.6983746 3 12 L 3 20 C 3 23.301625 5.6983746 26 9 26 C 12.301625 26 15 23.301625 15 20 L 15 12 C 15 8.6983746 12.301625 6 9 6 z M 17 6 L 17 26 L 19 26 L 19 19.320312 L 21.154297 16.283203 L 26.722656 26 L 29 26 L 22.429688 14.486328 L 28.451172 6 L 26 6 L 19 15.863281 L 19 6 L 17 6 z M 9 8 C 11.220375 8 13 9.7796254 13 12 L 13 20 C 13 22.220375 11.220375 24 9 24 C 6.7796254 24 5 22.220375 5 20 L 5 12 C 5 9.7796254 6.7796254 8 9 8 z"
@@ -68,6 +69,7 @@
 </template>
 
 <script>
+import { md5 } from "../../assets/js/md5.js"
 export default {
   data: function () {
     return {
@@ -112,13 +114,21 @@ export default {
       this.switch = a
     },
     async changeUser(method = null, value = null, name = null) {
+      let that = this
+       if(method == 4) {
+        value = md5(value)
+      }
+      console.log(method + "--" + value)
       const { data: res } = await this.$http.post("/users/" + method, {
         value,
         name,
       })
+      
       if (res.data == true) {
         this.$message.success("修改成功")
         //load
+        console.log(value)
+        that.maskHide()
         if (method == 3) {
           this.current_user = value
         }
@@ -134,8 +144,7 @@ export default {
           if (res.code == 10040) {
             if (this.current_user != null) {
               this.changeUser(3, this.changeUInp, this.current_user)
-              this.showChangeBox = false
-              this.showMask = false
+              this.maskHide();
             }
           } else {
             this.$message.warning("抱歉，此用户名已注册")

@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { md5 } from "../../assets/js/md5.js"
 export default {
   data: function () {
     return {
@@ -73,46 +74,54 @@ export default {
     },
     //删除用户
     delUser(k) {
+      let that = this
       this.$confirm("确定要删除此用户吗", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
       })
         .then(async () => {
-          const { data: res } = await this.$http.delete(
-            "/users/" + this.userList[k].id
+          const { data: res } = await that.$http.delete(
+            "/users/" + that.userList[k].id
           )
           if (res.code == 10021) {
-            this.userLoad()
-            this.$message.info("删除成功")
+            that.userLoad()
+            that.$message.success("删除成功")
           } else {
-            this.$message.info("删除失败")
+            that.$message.info("删除失败")
           }
         })
         .catch(() => {
-          this.$message.info("取消删除")
+          that.$message.info("取消删除")
         })
     },
     changeMana(k) {
+      let that = this
       this.$confirm("您确定要更改此用户的管理员权限吗", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
       })
         .then(() => {
-          this.userList[k].mana
-            ? this.changeUser(1, 0, this.userList[k].name)
-            : this.changeUser(1, 1, this.userList[k].name)
+          that.userList[k].mana == true
+            ? that.changeUser(1, 0, that.userList[k].name)
+            : that.changeUser(1, 1, that.userList[k].name)
+            console.log(this.userList[k].mana)
         })
         .catch(() => {
-          this.$message.info("取消更改")
+          that.$message.info("取消更改")
         })
     },
     async changeUser(method = null, value = null, name = null) {
+      console.log(value + "---------" + name)
+       if(method === 4) {
+        value = md5(value)
+      }
       const { data: res } = await this.$http.post("/users/" + method, {
-        value,
-        name,
+          value: value,
+          name: name,
       })
       if (res.data == true) {
         this.$message.success("修改成功")
+        this.userLoad()
         //load
         if (method == 3) {
           this.current_user = value

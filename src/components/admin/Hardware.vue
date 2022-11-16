@@ -156,20 +156,21 @@ export default {
       }
     },
     changeStatus(k) {
+      let that = this
       this.$confirm("请问是否要更改此硬件的状态", {
         confirmButtonText: "确认",
         cancelButtonText: "取消",
       })
         .then(async () => {
-          const { data: res } = await this.$http.put(
-            "/hardwares/" + this.HardwareList[k].id,
+          const { data: res } = await that.$http.put(
+            "/hardwares/" + that.HardwareList[k].id,
             {
               status: that.HardwareList[k].status == true ? 0 : 1,
             }
           )
           if (res.data == true) {
-            this.$message.success("修改成功")
-            this.hardwareLoad()
+            that.$message.success("修改成功")
+            that.hardwareLoad()
           }
         })
         .catch(() => {
@@ -177,21 +178,22 @@ export default {
         })
     },
     delHardware(k) {
+      let that = this
       this.$confirm("请问是否要删除此硬件", {
         confirmButtonText: "确认",
         cancelButtonText: "取消",
       })
         .then(async () => {
-          const { data: res } = await this.$http.delete(
-            "/hardwares/" + this.HardwareList[k].id
+          const { data: res } = await that.$http.delete(
+            "/hardwares/" + that.HardwareList[k].id
           )
           if (res.data == true) {
-            this.$message.success("删除成功")
-            this.hardwareLoad()
+            that.$message.success("删除成功")
+            that.hardwareLoad()
           }
         })
         .catch(() => {
-          this.$message.info("取消删除")
+          that.$message.info("取消删除")
         })
     },
   },

@@ -200,10 +200,6 @@ export default {
     width: 70%;
     height: 60%;
     position: relative;
-    // div {
-    //   width: 300px;
-    //   height: 300px;
-    // }
   }
   .rateChart {
     width: 30%;
