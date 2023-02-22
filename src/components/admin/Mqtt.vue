@@ -73,83 +73,83 @@
 export default {
   data: function () {
     return {
-      pubTopic: "",
-      pubContent: "",
-      subTopic: "",
-      MQTTAdress: "",
+      pubTopic: '',
+      pubContent: '',
+      subTopic: '',
+      MQTTAdress: '',
       MQTTStatus: false,
-      MQTTClient: "",
-      messBox: [],
+      MQTTClient: '',
+      messBox: []
     }
   },
   methods: {
-    testConnect() {
-      let that = this
+    testConnect () {
+      const that = this
       if (this.MQTTStatus == true) {
-        document.querySelector(".mqtt_send").onclick = function () {
+        document.querySelector('.mqtt_send').onclick = function () {
           that.topicPub()
         }
-        document.querySelector("#sub_t").onclick = function () {
+        document.querySelector('#sub_t').onclick = function () {
           that.topicSub()
         }
-        document.querySelector("#unsub_t").onclick = function () {
+        document.querySelector('#unsub_t').onclick = function () {
           that.unsubTopic()
         }
       } else {
-        this.$message.warning("MQTT服务器未连接")
+        this.$message.warning('MQTT服务器未连接')
       }
     },
-    topicPub() {
+    topicPub () {
       if (this.pubTopic !== null && this.pubContent !== null) {
         this.MQTTClient.publish(this.pubTopic, this.pubContent)
-        //添加会话消息
+        // 添加会话消息
         this.messBox.push({
           topic: this.pubTopic,
           message: this.pubContent,
-          reverse: true,
+          reverse: true
         })
-        this.$message.success("发布成功")
+        this.$message.success('发布成功')
       } else {
-        this.$message.warning("发布主题和内容不能为空")
+        this.$message.warning('发布主题和内容不能为空')
       }
     },
-    topicSub() {
-      let that = this
-      if (this.subTopic != null && this.subTopic != "") {
+    topicSub () {
+      const that = this
+      if (this.subTopic != null && this.subTopic != '') {
         this.MQTTClient.subscribe(this.subTopic, (err) => {
           if (!err) {
-            this.$message.success("订阅成功")
-            //处理消息
-            this.MQTTClient.on("message", function (topic, message) {
+            this.$message.success('订阅成功')
+            // 处理消息
+            this.MQTTClient.on('message', function (topic, message) {
               // 打印会话消息
               that.messBox.push({
                 topic: topic,
                 message: message,
-                reverse: false,
+                reverse: false
               })
-              document.querySelector(".mMessage").scrollTop += 600
-              document.querySelector(".mqtt_mes").scrollTop += 600
+              document.querySelector('.mMessage').scrollTop += 600
+              document.querySelector('.mqtt_mes').scrollTop += 600
             })
           } else {
-            this.$message.error("订阅失败")
+            this.$message.error('订阅失败')
           }
         })
       } else {
-        this.$message.warning("订阅的主题不能为空")
+        this.$message.warning('订阅的主题不能为空')
       }
     },
-    unsubTopic() {
-      if (this.subTopic != null && this.subTopic != "") {
+    unsubTopic () {
+      if (this.subTopic != null && this.subTopic != '') {
         this.MQTTClient.unsubscribe(this.subTopic, (err) => {
           if (!err) {
-            this.$message.success("取消订阅成功")
+            this.$message.success('取消订阅成功')
           }
         })
       } else {
-        this.$message.warning("主题不能为空")
+        this.$message.warning('主题不能为空')
       }
-    },
-  },
+    }
+  }
 }
 </script>
 

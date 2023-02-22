@@ -20,46 +20,46 @@
 export default {
   data: function () {
     return {
-      cubeLeft: "",
+      cubeLeft: '',
       cubeName: '',
       navList: [
         {
           id: 1,
           isActive: false,
-          name: "control",
-          href: "#icon-a-3d",
-          path: "/mobile/control",
+          name: 'control',
+          href: '#icon-a-3d',
+          path: '/mobile/control'
         },
         {
           id: 2,
           isActive: false,
-          name: "mqtt",
-          href: "#icon-a-Diagramroot",
-          path: "/mobile/mqtt",
+          name: 'mqtt',
+          href: '#icon-a-Diagramroot',
+          path: '/mobile/mqtt'
         },
         {
           id: 3,
           isActive: false,
-          name: "mana",
-          href: "#icon-Pyramid",
-          path: "/mobile/mana",
+          name: 'mana',
+          href: '#icon-Pyramid',
+          path: '/mobile/mana'
         },
         {
           id: 4,
           isActive: false,
-          name: "user",
-          href: "#icon-a-Snippetchart",
-          path: "/mobile/user",
-        },
-      ],
+          name: 'user',
+          href: '#icon-a-Snippetchart',
+          path: '/mobile/user'
+        }
+      ]
     }
   },
   methods: {
-    changeNav(k) {
-      this.cubeLeft = k * 25 + 4 + "%"
+    changeNav (k) {
+      this.cubeLeft = k * 25 + 4 + '%'
       this.cubeName = this.navList[k].name
-    },
-  },
+    }
+  }
 }
 </script>
 

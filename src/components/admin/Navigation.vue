@@ -26,44 +26,44 @@ export default {
         {
           id: 1,
           isActive: false,
-          name: "control",
-          href: "#icon-zhuye",
-          path: "/admin/control"
+          name: 'control',
+          href: '#icon-zhuye',
+          path: '/admin/control'
         },
         {
           id: 2,
           isActive: false,
-          name: "user",
-          href: "#icon-yonghu",
-          path: "/admin/user"
+          name: 'user',
+          href: '#icon-yonghu',
+          path: '/admin/user'
         },
         {
           id: 3,
           isActive: false,
-          name: "hardware",
-          href: "#icon-bangongyingjian",
-          path: "/admin/hardware"
+          name: 'hardware',
+          href: '#icon-bangongyingjian',
+          path: '/admin/hardware'
         },
         {
           id: 4,
           isActive: false,
-          name: "chart",
-          href: "#icon-Rise",
-          path: "/admin/chart"
-        },
-      ],
+          name: 'chart',
+          href: '#icon-Rise',
+          path: '/admin/chart'
+        }
+      ]
     }
   },
   methods: {
-    navchange(k) {
+    navchange (k) {
       this.navList[k].isActive = true
       this.navList.forEach((o, i) => {
         if (i != k) {
           o.isActive = false
         }
       })
-    },
-  },
+    }
+  }
 }
 </script>
 

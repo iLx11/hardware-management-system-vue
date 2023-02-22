@@ -44,52 +44,52 @@
 </template>
 
 <script>
-import { md5 } from "../assets/js/md5.js"
+import { postUserLogin } from '@/API/userAPI.js'
+import { md5 } from '../assets/js/md5.js'
+
 export default {
   data: function () {
     return {
       formData: {
-        name: "",
-        password: "",
-      },
+        name: '',
+        password: ''
+      }
     }
   },
   methods: {
-    async submit(res) {
-      if (this.formData.name != "" && this.formData.password != "") {
+    async submit (res) {
+      if (this.formData.name !== '' && this.formData.password !== '') {
         this.formData.password = md5(this.formData.password)
-        const { data: res } = await this.$http.post(
-          "/users/login",
-          this.formData
-        )
-        if (res.code == 10041) {
-          this.$message.success("验证成功")
-          let clientW = document.documentElement.clientWidth
+        // 验证用户名与密码
+        const { data: res } = await postUserLogin(this.formData)
+        if (res.code === 10041) {
+          this.$message.success('验证成功')
+          const clientW = document.documentElement.clientWidth
           if (clientW > 600) {
-            this.$router.push("/admin")
+            this.$router.push('/admin')
           } else {
-            this.$router.push("/mobile")
+            this.$router.push('/mobile')
           }
         } else {
-          this.$message.warning("验证失败")
+          this.$message.warning('验证失败')
           setTimeout(() => {
-            this.$confirm("账号未注册，是否跳转到注册页面", "提示", {
-              confirmButtonText: "确定",
-              cancelButtonText: "取消",
+            this.$confirm('账号未注册，是否跳转到注册页面', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消'
             })
               .then(() => {
-                this.$router.push("/Register")
+                this.$router.push('/Register')
               })
               .catch(() => {
-                this.$message.info("取消跳转")
+                this.$message.info('取消跳转')
               })
           }, 3000)
         }
       } else {
-        this.$message.warning("有输入框未填写")
+        this.$message.warning('有输入框未填写')
       }
-    },
-  },
+    }
+  }
 }
 </script>
 

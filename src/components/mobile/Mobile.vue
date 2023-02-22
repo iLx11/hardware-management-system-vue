@@ -9,32 +9,32 @@
 </template>
 
 <script>
-import Bnav from "./Bnav.vue"
+import Bnav from './Bnav.vue'
 
 export default {
   data: function () {
     return {
-      MQTTAddress: "",
+      MQTTAddress: '',
       MQTTStatus: false,
-      MQTTClient: "",
+      MQTTClient: ''
     }
   },
-  mounted() {
+  mounted () {
   },
   components: {
-    Bnav,
+    Bnav
   },
   methods: {
-    address(e) {
+    address (e) {
       this.MQTTAddress = e
     },
-    status(e) {
+    status (e) {
       this.MQTTStatus = e
     },
-    client(e) {
+    client (e) {
       this.MQTTClient = e
-    },
-  },
+    }
+  }
 }
 </script>
 

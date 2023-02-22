@@ -1,7 +1,7 @@
 <template>
   <section class="constructor">
     <div class="bg"></div>
-    <div :class="{construction: true,pageStop: pageStopc}">
+    <div :class="{ construction: true, pageStop: pageStopc }">
       <!-- 页面头部 -->
       <Header @address="address" @status="status" @client="client"></Header>
       <!-- 页面内容 -->
@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import Header from "./Header.vue"
-import Content from "./Content.vue"
+import Header from './Header.vue'
+import Content from './Content.vue'
 
 export default {
   data: function () {
@@ -22,31 +22,31 @@ export default {
   },
   components: {
     Header,
-    Content,
+    Content
   },
-  mounted() {
-    let that = this
-     window.onresize = function() {
-        let clientW = document.documentElement.clientWidth;
-        if (clientW < 900) {
-           that.pageStopc = true
-        }else {
-          that.pageStopc = false
-        }
+  created () {
+    const that = this
+    window.onresize = function () {
+      const clientW = document.documentElement.clientWidth
+      if (clientW < 900) {
+        that.pageStopc = true
+      } else {
+        that.pageStopc = false
+      }
     }
     console.log(this.$refs.content.$refs.mqtt.messBox)
   },
   methods: {
-    address(e) {
+    address (e) {
       this.$refs.content.$refs.mqtt.MQTTAdress = e
     },
-    status(e) {
+    status (e) {
       this.$refs.content.$refs.mqtt.MQTTStatus = e
     },
-    client(e) {
+    client (e) {
       this.$refs.content.$refs.mqtt.MQTTClient = e
-    },
-  },
+    }
+  }
 }
 </script>
 
@@ -62,7 +62,7 @@ export default {
     left: 0;
     z-index: -1;
     /*background: rgba(243, 246, 253, 1.0);*/
-    background: url("../../assets/img/bg.png");
+    background: url('../../assets/img/bg.png');
   }
   /*页面结构*/
   .construction {
@@ -78,7 +78,7 @@ export default {
   }
   .pageStop {
     width: 900px !important;
-    left:0 !important;
+    left: 0 !important;
     transform: translate(0, -50%) !important;
   }
 }

@@ -69,106 +69,101 @@
 </template>
 
 <script>
-import { md5 } from "../../assets/js/md5.js"
+import { getUserByName, postChangeUser } from '@/API/userAPI.js'
+import { md5 } from '../../assets/js/md5.js'
+
 export default {
   data: function () {
     return {
-      changeUInp: "",
-      switch: "",
-      current_user: "",
+      changeUInp: '',
+      switch: '',
+      current_user: '',
       showChangeBox: false,
-       showMask: false,
+      showMask: false
     }
   },
-  mounted() {
-    this.current_user = this.getCookie("user")
-    if (this.currentUser != "" && this.currentUser != null) {
+  created () {
+    this.current_user = this.getCookie('user')
+    if (this.currentUser !== '' && this.currentUser != null) {
       this.changeUser(2, 1, this.current_user)
-    }else {
-      this.$message.warning("用户未登录")
-      //跳转到登陆界面
+    } else {
+      this.$message.warning('用户未登录')
+      // 跳转到登陆界面
       // this.$router.push("/login")
     }
   },
   methods: {
-    //用户退出
-    exit() {
-      this.$confirm("你真的想要退出吗", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+    // 用户退出
+    exit () {
+      this.$confirm('你真的想要退出吗', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
       })
         .then(() => {
           this.changeUser(2, 0, this.current_user)
-
-          this.$message.success("退出成功")
+          this.$message.success('退出成功')
         })
         .catch(() => {
-          this.$message.info("取消退出")
+          this.$message.info('取消退出')
         })
     },
-    //用户更改输入
-    dataTransfer(a) {
+    // 用户更改输入
+    dataTransfer (a) {
       this.changeUInp = this.current_user
       this.showChangeBox = true
       this.showMask = true
       this.switch = a
     },
-    async changeUser(method = null, value = null, name = null) {
-      let that = this
-       if(method == 4) {
+    async changeUser (method = null, value = null, name = null) {
+      const that = this
+      if (method === 4) {
         value = md5(value)
       }
-      console.log(method + "--" + value)
-      const { data: res } = await this.$http.post("/users/" + method, {
-        value,
-        name,
-      })
-      
-      if (res.data == true) {
-        this.$message.success("修改成功")
-        //load
+      console.log(method + '--' + value)
+      const { data: res } = await postChangeUser(method, value, name)
+      if (res.data === true) {
+        this.$message.success('修改成功')
+        // load
         console.log(value)
         that.maskHide()
-        if (method == 3) {
+        if (method === 3) {
           this.current_user = value
         }
       }
     },
-    //提交更改
-    async subChange() {
-      if (this.changeUInp != "" && this.changeUInp != null) {
-        if (this.switch == 1) {
-          const { data: res } = await this.$http.get(
-            "/users/" + this.changeUInp
-          )
-          if (res.code == 10040) {
+    // 提交更改
+    async subChange () {
+      if (this.changeUInp !== '' && this.changeUInp != null) {
+        if (this.switch === 1) {
+          const { data: res } = await getUserByName(this.changeUInp)
+          if (res.code === 10040) {
             if (this.current_user != null) {
               this.changeUser(3, this.changeUInp, this.current_user)
-              this.maskHide();
+              this.maskHide()
             }
           } else {
-            this.$message.warning("抱歉，此用户名已注册")
+            this.$message.warning('抱歉，此用户名已注册')
           }
         }
-        if (this.switch == 2) {
+        if (this.switch === 2) {
           this.changeUser(4, this.changeUInp, this.current_user)
         }
       } else {
-        this.$message.warning("请输入内容")
+        this.$message.warning('请输入内容')
       }
     },
-    maskHide() {
+    maskHide () {
       this.showChangeBox = false
       this.showMask = false
     },
-    getCookie(objname) {
-      let arrstr = document.cookie.split("; ")
-      for (var i = 0; i < arrstr.length; i++) {
-        var temp = arrstr[i].split("=")
+    getCookie (objname) {
+      const arrstr = document.cookie.split('; ')
+      for (let i = 0; i < arrstr.length; i++) {
+        const temp = arrstr[i].split('=')
         if (temp[0] === objname) return unescape(temp[1])
       }
-    },
-  },
+    }
+  }
 }
 </script>
 
@@ -182,8 +177,7 @@ export default {
   padding: 0.5em;
   margin-bottom: 0.9em;
   background: rgba(255, 255, 255, 0.8);
-    overflow: hidden;
-
+  overflow: hidden;
 }
 
 .ct {

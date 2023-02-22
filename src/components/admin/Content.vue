@@ -12,17 +12,17 @@
 </template>
 
 <script>
-import Navigation from './Navigation.vue' 
-import Mqtt from './Mqtt.vue'     
+import Navigation from './Navigation.vue'
+import Mqtt from './Mqtt.vue'
 
 export default {
   data: function () {
     return {}
   },
   components: {
-        Navigation,
-        Mqtt,
-  },
+    Navigation,
+    Mqtt
+  }
 }
 </script>
 

@@ -22,112 +22,112 @@
 
 <script>
 // import echarts from 'echarts'
-import * as echarts from "echarts"
+import * as echarts from 'echarts'
 export default {
   data: function () {
     return {}
   },
-  mounted() {
-    let chartDom = document.getElementById("dailyUse")
-    let chartDom1 = document.getElementById("dailyRate")
-    let chartDom2 = document.getElementById("dailyStatus")
-    let myChart = echarts.init(chartDom)
-    let myChart1 = echarts.init(chartDom1)
-    let myChart2 = echarts.init(chartDom2)
-    let option = {
+  mounted () {
+    const chartDom = document.getElementById('dailyUse')
+    const chartDom1 = document.getElementById('dailyRate')
+    const chartDom2 = document.getElementById('dailyStatus')
+    const myChart = echarts.init(chartDom)
+    const myChart1 = echarts.init(chartDom1)
+    const myChart2 = echarts.init(chartDom2)
+    const option = {
       xAxis: {
-        type: "category",
-        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        type: 'category',
+        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
       },
       yAxis: {
-        type: "value",
+        type: 'value'
       },
       legend: {
-        top: "10%",
-        left: "center",
+        top: '10%',
+        left: 'center'
       },
       grid: {
-        top: "10%",
-        left: "9%",
-        right: "9%",
-        bottom: "18%",
+        top: '10%',
+        left: '9%',
+        right: '9%',
+        bottom: '18%'
       },
       tooltip: {
-        trigger: "axis",
+        trigger: 'axis'
       },
       legend: {
-        data: ["Window", "Light", "Fan"],
+        data: ['Window', 'Light', 'Fan']
       },
       series: [
         {
-          name: "Window",
+          name: 'Window',
           data: [23, 32, 23, 45, 50, 13, 50],
-          type: "line",
-          smooth: true,
+          type: 'line',
+          smooth: true
         },
         {
-          name: "Light",
+          name: 'Light',
           data: [30, 45, 24, 4, 43, 30, 10],
-          type: "line",
-          smooth: true,
+          type: 'line',
+          smooth: true
         },
         {
-          name: "Fan",
+          name: 'Fan',
           data: [20, 62, 31, 54, 20, 10, 10],
-          type: "line",
-          smooth: true,
-        },
-      ],
+          type: 'line',
+          smooth: true
+        }
+      ]
     }
-    let option1 = {
+    const option1 = {
       legend: {
-        top: "8%",
-        left: "center",
+        top: '8%',
+        left: 'center'
       },
       // toolbox: {
       //   show: true,
       //     saveAsImage: { show: true },
       // },
       tooltip: {
-        trigger: "item",
-        formatter: "{b} : {c} ({d}%)",
+        trigger: 'item',
+        formatter: '{b} : {c} ({d}%)'
       },
       series: [
         {
-          name: "Nightingale Chart",
-          type: "pie",
+          name: 'Nightingale Chart',
+          type: 'pie',
           radius: [15, 85],
-          center: ["50%", "62%"],
-          roseType: "area",
+          center: ['50%', '62%'],
+          roseType: 'area',
           itemStyle: {
-            borderRadius: 3,
+            borderRadius: 3
           },
           label: {
-            show: false,
+            show: false
           },
           emphasis: {
             label: {
-              show: false,
-            },
+              show: false
+            }
           },
           data: [
-            { value: 40, name: "Window" },
-            { value: 38, name: "Fan" },
-            { value: 32, name: "Light" },
-            { value: 30, name: "Wet" },
-            { value: 28, name: "Curtain" },
-          ],
-        },
-      ],
+            { value: 40, name: 'Window' },
+            { value: 38, name: 'Fan' },
+            { value: 32, name: 'Light' },
+            { value: 30, name: 'Wet' },
+            { value: 28, name: 'Curtain' }
+          ]
+        }
+      ]
     }
-    let option2 = {
+    const option2 = {
       xAxis: {},
       yAxis: {},
       grid: {
-        top: "10%",
-        left: "5%",
-        right: "5%",
-        bottom: "14%",
+        top: '10%',
+        left: '5%',
+        right: '5%',
+        bottom: '14%'
       },
       series: [
         {
@@ -154,16 +154,16 @@ export default {
             [12.0, 6.26],
             [12.0, 8.84],
             [7.08, 5.82],
-            [5.02, 5.68],
+            [5.02, 5.68]
           ],
-          type: "scatter",
-        },
-      ],
+          type: 'scatter'
+        }
+      ]
     }
     option && myChart.setOption(option)
     option1 && myChart1.setOption(option1)
     option2 && myChart2.setOption(option2)
-  },
+  }
 }
 </script>
 

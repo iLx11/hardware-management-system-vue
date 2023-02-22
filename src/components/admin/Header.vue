@@ -34,129 +34,132 @@
 
 <script>
 import mqtt from 'mqtt'
+import { postChangeUser, getUserByName } from '@/API/userAPI.js'
 
 export default {
   data: function () {
     return {
-      changeUInp: "",
-      switch: "",
-      current_user: "",
+      changeUInp: '',
+      switch: '',
+      current_user: '',
       showChangeBox: false,
       showMask: false,
       mqttInp: '',
       options: {
-        //mqtt客户端id
+        // mqtt客户端id
         // clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
-        clientId: '75ee4e39450943889749e9924e3a982c',
+        clientId: '75ee4e39450943889749e9924e3a982c'
         // connectTimeout: 3,
       }
     }
   },
-  mounted() {
-    //根据cookie获取用户
-    this.current_user = this.getCookie("user")
-    if (this.currentUser != "" && this.currentUser != null) {
+  created () {
+    // 根据cookie获取用户
+    this.current_user = this.getCookie('user')
+    if (this.currentUser !== '' && this.currentUser != null) {
       this.changeUser(2, 1, this.current_user)
-    }else {
-      this.$message.warning("用户未登录")
-      //跳转到登陆界面
+    } else {
+      this.$message.warning('用户未登录')
+      // 跳转到登陆界面
       // this.$router.push("/login")
     }
   },
   methods: {
     // 连接MQTT服务器
-    MQTTConnect() {
-      console.log("123123")
-      if (this.mqttInp == null || this.mqttInp == '') {
-            this.$message.warning("服务器地址为空")
-        } else {
-            //给父组件传值
-            this.$emit('address', this.mqttInp)
-            let client = mqtt.connect(this.mqttInp, this.options)
-            client.on('connect', () => {
-                // 给父组件传状态
-                this.$emit('status', true)
-                //给父组件传对象
-                this.$emit('client', client)
-                this.$message.success("连接成功")
-            })
-            client.on('error', function(err) {
-                this.$message.error("连接失败")
-                client.end();
-            })
-        }
+    MQTTConnect () {
+      console.log('123123')
+      if (this.mqttInp == null || this.mqttInp === '') {
+        this.$message.warning('服务器地址为空')
+      } else {
+        // 给父组件传值
+        this.$emit('address', this.mqttInp)
+        const client = mqtt.connect(this.mqttInp, this.options)
+        client.on('connect', () => {
+          // 给父组件传状态
+          this.$emit('status', true)
+          // 给父组件传对象
+          this.$emit('client', client)
+          this.$message.success('连接成功')
+        })
+        client.on('error', function (err) {
+          this.$message.error('连接失败')
+          console.log(err)
+          client.end()
+        })
+      }
     },
-    //用户退出
-    exit() {
-      this.$confirm("你真的想要退出吗", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+    // 用户退出
+    exit () {
+      this.$confirm('你真的想要退出吗', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
       })
         .then(() => {
           this.changeUser(2, 0, this.current_user)
 
-          this.$message.success("退出成功")
+          this.$message.success('退出成功')
         })
         .catch(() => {
-          this.$message.info("取消退出")
+          this.$message.info('取消退出')
         })
     },
-    //用户更改输入
-    dataTransfer(a) {
+    // 用户更改输入
+    dataTransfer (a) {
       this.changeUInp = this.current_user
       this.showChangeBox = true
       this.showMask = true
       this.switch = a
     },
-    async changeUser(method = null, value = null, name = null) {
-      const { data: res } = await this.$http.post("/users/" + method, {
-        value,
-        name,
-      })
-      if (res.data == true) {
-        this.$message.success("修改成功")
-        //load
-        if (method == 3) {
+    // 将请求发到服务器
+    async changeUser (method = null, value = null, name = null) {
+      // 发起post请求修改用户
+      const { data: res } = await postChangeUser(method, value, name)
+      if (res.data === true) {
+        this.$message.success('修改成功')
+        // load
+        if (method === 3) {
           this.current_user = value
         }
       }
     },
-    //提交更改
-    async subChange() {
-      if (this.changeUInp != "" && this.changeUInp != null) {
+    // 修改用户的逻辑
+    async subChange () {
+      if (this.changeUInp != '' && this.changeUInp != null) {
         if (this.switch == 1) {
-          const { data: res } = await this.$http.get(
-            "/users/" + this.changeUInp
-          )
-          if (res.code == 10040) {
+          // 获取当前输入的用户名，判读是否已经存在用户
+          const { data: res } = await getUserByName(this.changeUInp)
+          // 如果不存在则继续修改
+          if (res.code === 10040) {
             if (this.current_user != null) {
               this.changeUser(3, this.changeUInp, this.current_user)
               this.showChangeBox = false
               this.showMask = false
             }
           } else {
-            this.$message.warning("抱歉，此用户名已注册")
+            this.$message.warning('抱歉，此用户名已注册')
           }
         }
-        if (this.switch == 2) {
+        if (this.switch === 2) {
           this.changeUser(4, this.changeUInp, this.current_user)
         }
       } else {
-        this.$message.warning("请输入内容")
+        this.$message.warning('请输入内容')
       }
     },
-    maskHide() {
+    // 隐藏遮罩
+    maskHide () {
       this.showChangeBox = false
       this.showMask = false
     },
-    getCookie(objname) {
-      let arrstr = document.cookie.split("; ")
-      for (var i = 0; i < arrstr.length; i++) {
-        var temp = arrstr[i].split("=")
+    // 获取用户 cookie
+    getCookie (objname) {
+      const arrstr = document.cookie.split('; ')
+      for (let i = 0; i < arrstr.length; i++) {
+        const temp = arrstr[i].split('=')
         if (temp[0] === objname) return unescape(temp[1])
       }
-    },
-  },
+    }
+  }
 }
 </script>
 

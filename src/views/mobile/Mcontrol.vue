@@ -145,134 +145,120 @@
 </template>
 
 <script>
-import mqtt from "mqtt"
+import mqtt from 'mqtt'
+import { getHardwareList, AGSWControl, SPSWControl } from '@/API/hardwareAPI'
 export default {
   data: function () {
     return {
       AnaList: [],
       SpList: [],
-      mqttInp: "",
+      mqttInp: '',
       options: {
-        //mqtt客户端id
+        // mqtt客户端id
         // clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
-        clientId: "75ee4e39450943889749e9924e3a982c",
+        clientId: '75ee4e39450943889749e9924e3a982c'
         // connectTimeout: 3,
-      },
+      }
     }
   },
-  mounted() {
+  created () {
     this.hardwareLoad()
-    let hardwareIP = "http://192.168.0.110"
-    localStorage.setItem("hardwareIP", hardwareIP) //储存函数
+    // let hardwareIP = "http://192.168.0.110"
+    const hardwareIP = 'http://192.168.43.95'
+    localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
   },
   methods: {
     // 连接MQTT服务器
-    MQTTConnect() {
-      console.log("123123")
-      if (this.mqttInp == null || this.mqttInp == "") {
-        this.$message.warning("服务器地址为空")
+    MQTTConnect () {
+      console.log('123123')
+      if (this.mqttInp == null || this.mqttInp == '') {
+        this.$message.warning('服务器地址为空')
       } else {
-        //给父组件传值
-        this.$emit("address", this.mqttInp)
-        let client = mqtt.connect(this.mqttInp, this.options)
-        client.on("connect", () => {
+        // 给父组件传值
+        this.$emit('address', this.mqttInp)
+        const client = mqtt.connect(this.mqttInp, this.options)
+        client.on('connect', () => {
           // 给父组件传状态
-          this.$emit("status", true)
-          //给父组件传对象
-          this.$emit("client", client)
-          this.$message.success("连接成功")
+          this.$emit('status', true)
+          // 给父组件传对象
+          this.$emit('client', client)
+          this.$message.success('连接成功')
         })
-        client.on("error", (err) => {
-          this.$message.error("连接失败")
+        client.on('error', (err) => {
+          this.$message.error('连接失败')
+          console.log(err)
           client.end()
         })
       }
     },
-    async hardwareLoad() {
-      const { data: res } = await this.$http.get("/hardwares")
+    async hardwareLoad () {
+      const { data: res } = await getHardwareList()
       this.hardwareLength = res.data.length
-      let HardwareList = res.data
-      let pattern1 = /^AGSW/
-      let pattern2 = /^SPSW/
-      this.AnaList = HardwareList.filter((o) => {
-        return pattern1.test(o.hardwareId)
-      })
-      this.SpList = HardwareList.filter((o) => {
-        return pattern2.test(o.hardwareId)
-      })
+      const HardwareList = res.data
+      const pattern1 = /^AGSW/
+      const pattern2 = /^SPSW/
+      this.AnaList = HardwareList.filter(o => pattern1.test(o.hardwareId))
+      this.SpList = HardwareList.filter(o => pattern2.test(o.hardwareId))
     },
-    //模拟引脚显示
-    analogShow(k, ev) {
-      let that = this
-      if (ev.target.parentNode.parentNode.nextSibling.style.display == "none") {
-        ev.target.parentNode.parentNode.nextSibling.style.display = "block"
-        let barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
-        let indicator =
+    // 模拟引脚显示
+    analogShow (k, ev) {
+      const that = this
+      const barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
+      if (ev.target.parentNode.parentNode.nextSibling.style.display === 'none') {
+        ev.target.parentNode.parentNode.nextSibling.style.display = 'block'
+        const indicator =
           ev.target.parentNode.parentNode.nextSibling.children[1].children[0]
         // let barIn = $(".bar-input").eq(k)[0]
-        barIn.addEventListener("change", function () {
-          indicator.innerHTML = barIn.value + "%"
-          indicator.style.marginLeft = barIn.value + "%"
-          that.AnaGet(k, "pwm", barIn.value)
+        barIn.addEventListener('change', function () {
+          indicator.innerHTML = barIn.value + '%'
+          indicator.style.marginLeft = barIn.value + '%'
+          that.AnaGet(k, 'pwm', barIn.value)
         })
-        //实时改变
-        barIn.addEventListener("touchmove", function () {
-          indicator.innerHTML = barIn.value + "%"
-          indicator.style.marginLeft = barIn.value + "%"
-          that.AnaGet(k, "pwm", barIn.value)
+        // 实时改变
+        barIn.addEventListener('touchmove', function () {
+          indicator.innerHTML = barIn.value + '%'
+          indicator.style.marginLeft = barIn.value + '%'
+          that.AnaGet(k, 'pwm', barIn.value)
         })
       } else {
-        ev.target.parentNode.parentNode.nextSibling.style.display = "none"
-        barIn.removeEventListener("click")
-        barIn.removeEventListener("change")
+        ev.target.parentNode.parentNode.nextSibling.style.display = 'none'
+        barIn.removeEventListener('click')
+        barIn.removeEventListener('change')
       }
     },
-    //模拟控制硬件简单控制
-    AnaSwitch(k, ins) {
+    // 模拟控制硬件简单控制
+    AnaSwitch (k, ins) {
       this.AnaGet(k, ins)
       console.log(ins)
       console.log(this.AnaList[k].hardwareId.substring(4))
     },
-    async AnaGet(k, ins, pwm = 0) {
+    async AnaGet (k, ins, pwm = 0) {
       // 读取硬件8266IP
-      let hIP = localStorage.getItem("hardwareIP") //读取函数
-      let num = this.AnaList[k].hardwareId.substring(4)
-      const { data: res } = await this.$http.get(hIP + "/agswcontrol" + num, {
-        params: {
-          // name: this.AnaList[k].name,
-          // hardwareId: this.AnaList[k].hardwareId,
-          hardwarePort: this.AnaList[k].hardwarePort,
-          instruction: ins,
-          pwm: pwm,
-        },
-      })
+      const hIP = localStorage.getItem('hardwareIP') // 读取函数
+      const num = this.AnaList[k].hardwareId.substring(4)
+      const { data: res } = await AGSWControl(hIP, num, this.AnaList[k].hardwarePort, ins, pwm)
+      console.log(res)
     },
-    //简单控制
-    async SPSWControl(k, ins) {
+    // 简单控制
+    async SPSWControl (k, ins) {
       // 读取@硬件8266IP
-      let hIP = localStorage.getItem("hardwareIP") //读取函数
-      let num = this.SpList[k].hardwareId.substring(4)
-       let json = {
-          hardwarePort: this.SpList[k].hardwarePort,
-          instruction: ins,
-          num: ""
-        }
-      if (num == "02" || num == "03") {
-        json.num = "relay"
-      }else {
-        json.num = "motor"
-      }
-
-      const { data: res } = await this.$http.get(hIP + "/spswcontrol" + num, {
-        params: {
-          // name: this.SpList[k].name,
-          // hardwareId: this.SpList[k].hardwareId,
-          jsonData: JSON.stringify(json),
-        },
+      const hIP = localStorage.getItem('hardwareIP') // 读取函数
+      const num = this.SpList[k].hardwareId.substring(4)
+      const json = JSON.stringify({
+        hardwarePort: this.SpList[k].hardwarePort,
+        instruction: ins,
+        num: ''
       })
-      this.$message.success(this.SpList[k].name + "操作成功")
-    },
-  },
+      if (num === '02' || num === '03') {
+        json.num = 'relay'
+      } else {
+        json.num = 'motor'
+      }
+      const { data: res } = await SPSWControl(hIP, num, json)
+      console.log(res)
+      this.$message.success(this.SpList[k].name + '操作成功')
+    }
+  }
 }
 </script>
 

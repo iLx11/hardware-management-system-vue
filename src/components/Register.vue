@@ -44,55 +44,59 @@
 </template>
 
 <script>
-import {md5} from '../assets/js/md5.js'
+import { getUserByName, postUserRegister } from '@/API/userAPI.js'
+import { md5 } from '../assets/js/md5.js'
+
 export default {
   data: function () {
     return {
       formData: {
-        name: "",
-        password: "",
-      },
+        name: '',
+        password: ''
+      }
     }
   },
   methods: {
-    async hasUser() {
-      if (this.formData.name != "") {
-        const { data: res } = await this.$http.get(
-          "/users/" + this.formData.name
-        )
-        if (res.code == 10041) {
-          this.$message.error("抱歉，该用户名已被占用")
+    async hasUser () {
+      if (this.formData.name !== '') {
+        // 验证用户是否已被注册
+        const { data: res } = await getUserByName(this.formData.name)
+        if (res.code === 10041) {
+          this.$message.error('抱歉，该用户名已被占用')
           return false
         } else {
-          this.$message.success("该用户名可用")
+          this.$message.success('该用户名可用')
           return true
         }
       } else {
-        this.$message.error("请输入内容")
+        this.$message.error('请输入内容')
       }
     },
-    async submit(res) {
-      if (this.formData.name != "" && this.formData.password != "") {
+    async submit (res) {
+      if (this.formData.name !== '' && this.formData.password !== '') {
         if (this.hasUser()) {
           this.formData.password = md5(this.formData.password)
-          const { data: res } = await this.$http.post(
-            "/users/register",
-            this.formData
-          )
-          if (res.code == 10011) {
-            this.$message.success("注册成功")
-            this.$router.push("/admin")
+          // 用户注册
+          const { data: res } = await postUserRegister(this.formData)
+          if (res.code === 10011) {
+            this.$message.success('注册成功')
+            const clientW = document.documentElement.clientWidth
+            if (clientW > 600) {
+              this.$router.push('/admin')
+            } else {
+              this.$router.push('/mobile')
+            }
           } else {
-            this.$message.error("注册失败")
+            this.$message.error('注册失败')
           }
-        }else {
-          this.$message.info("抱歉，该用户名已被占用")
+        } else {
+          this.$message.info('抱歉，该用户名已被占用')
         }
       } else {
-        this.$message.warning("有输入框未填写")
+        this.$message.warning('有输入框未填写')
       }
-    },
-  },
+    }
+  }
 }
 </script>
 

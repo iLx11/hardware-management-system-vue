@@ -49,13 +49,13 @@ export default {
   data: function () {
     return {
       formData: {
-        hardwareName: "23",
-        hardwarePort: "",
-        hardwareId: "",
-      },
+        hardwareName: '23',
+        hardwarePort: '',
+        hardwareId: ''
+      }
     }
   },
-  props: ["showChangeh", "showMask"],
+  props: ['showChangeh', 'showMask']
 }
 </script>
 

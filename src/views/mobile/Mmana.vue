@@ -216,6 +216,8 @@
 </template>
 
 <script>
+import { deleteUserById, getUserList, postChangeUser } from '@/API/userAPI'
+import { deleteHardwareById, getHardwareList, postNewHardware, putChangeHardware, putChangeHardwareStatus } from '@/API/hardwareAPI'
 export default {
   data: function () {
     return {
@@ -228,73 +230,71 @@ export default {
       showChangeHardware: false,
       showMask: false,
       activeColor: false,
-      currentId: "",
+      currentId: '',
       formDataAlter: {
-        hardwareName: "",
-        hardwarePort: "",
-        hardwareId: "",
+        hardwareName: '',
+        hardwarePort: '',
+        hardwareId: ''
       },
       formDataAdd: {
-        hardwareName: "",
-        hardwarePort: "",
-        hardwareId: "",
-      },
+        hardwareName: '',
+        hardwarePort: '',
+        hardwareId: ''
+      }
     }
   },
-  mounted() {
+  created () {
     this.userLoad()
     this.hardwareLoad()
   },
   methods: {
-    showUL() {
+    showUL () {
       this.showUserList = true
       this.showHardwareList = false
       this.showAddBox = false
       this.showAddHardware = false
       this.activeColor = false
     },
-    showHL() {
+    showHL () {
       this.showUserList = false
       this.showHardwareList = true
       this.showAddBox = true
       this.showAddHardware = false
       this.activeColor = true
     },
-    showBox() {
+    showBox () {
       this.showAddHardware = true
     },
-    //加载完成后执行（导入列表）
-    async userLoad() {
-      const { data: res } = await this.$http.get("/users")
+    // 加载完成后执行（导入列表）
+    async userLoad () {
+      const { data: res } = await getUserList()
       this.userList = res.data
     },
-    //删除用户
-    delUser(k) {
-      let that = this
-      this.$confirm("确定要删除此用户吗", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+    // 删除用户
+    delUser (k) {
+      const that = this
+      this.$confirm('确定要删除此用户吗', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
       })
         .then(async () => {
-          const { data: res } = await that.$http.delete(
-            "/users/" + that.userList[k].id
-          )
-          if (res.code == 10021) {
+          const { data: res } = await deleteUserById(that.userList[k].id)
+          if (res.code === 10021) {
             that.userLoad()
-            that.$message.success("删除成功")
+            that.$message.success('删除成功')
           } else {
-            that.$message.info("删除失败")
+            that.$message.info('删除失败')
           }
         })
         .catch(() => {
-          that.$message.info("取消删除")
+          that.$message.info('取消删除')
         })
     },
-    changeMana(k) {
-      let that = this
-      this.$confirm("您确定要更改此用户的管理员权限吗", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+    changeMana (k) {
+      const that = this
+      this.$confirm('您确定要更改此用户的管理员权限吗', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
       })
         .then(() => {
           that.userList[k].mana
@@ -302,74 +302,61 @@ export default {
             : that.changeUser(1, 1, that.userList[k].name)
         })
         .catch(() => {
-          that.$message.info("取消更改")
+          that.$message.info('取消更改')
         })
     },
-    async changeUser(method = null, value = null, name = null) {
-      const { data: res } = await this.$http.post("/users/" + method, {
-        value,
-        name,
-      })
-      if (res.data == true) {
-        this.$message.success("修改成功")
-        //load
+    async changeUser (method = null, value = null, name = null) {
+      const { data: res } = await postChangeUser(method, value, name)
+      if (res.data === true) {
+        this.$message.success('修改成功')
+        // load
         this.userLoad()
         this.maskHide()
-        if (method == 3) {
+        if (method === 3) {
           this.current_user = value
         }
       }
     },
-    maskHide() {
+    maskHide () {
       this.showChangeh = false
       this.showMask = false
       this.showChangeHardware = false
     },
-    async hardwareLoad() {
-      const { data: res } = await this.$http.get("/hardwares")
+    async hardwareLoad () {
+      const { data: res } = await getHardwareList()
       this.HardwareList = res.data
     },
-    //硬件部分
-    async addHardware() {
-      if (this.formDataAdd != null && this.formDataAdd != "") {
-        const { data: res } = await this.$http.post("/hardwares", {
-          name: this.formDataAdd.hardwareName,
-          hardwareId: this.formDataAdd.hardwareId,
-          hardwarePort: this.formDataAdd.hardwarePort,
-        })
-        if (res.data == true) {
-          this.$message.success("添加成功")
+    // 硬件部分
+    async addHardware () {
+      if (this.formDataAdd != null && this.formDataAdd != '') {
+        const { data: res } = await postNewHardware(this.formDataAdd.hardwareName, this.formDataAdd.hardwareId, this.formDataAdd.hardwarePort)
+        if (res.data === true) {
+          this.$message.success('添加成功')
           this.hardwareLoad()
         }
       }
     },
-    changeHardware(k) {
+    changeHardware (k) {
       this.showChangeHardware = true
       this.showMask = true
       this.currentId = k
-      console.log(this.currentId)
       this.formDataAlter.hardwareName = this.HardwareList[k].name
       this.formDataAlter.hardwareId = this.HardwareList[k].hardwareId
       this.formDataAlter.hardwarePort = this.HardwareList[k].hardwarePort
     },
-    async changeHardwareDo() {
-      if (this.formDataAlter != null && this.formDataAlter != "") {
-        const { data: res } = await this.$http.put("/hardwares", {
-          id: this.currentId + 1,
-          name: this.formDataAlter.hardwareName,
-          hardwareId: this.formDataAlter.hardwareId,
-          hardwarePort: this.formDataAlter.hardwarePort,
-        })
-        if (res.data == true) {
-          this.$message.success("修改成功")
+    async changeHardwareDo () {
+      if (this.formDataAlter != null && this.formDataAlter !== '') {
+        const { data: res } = await putChangeHardware(this.currentId + 1, this.formDataAlter.hardwareName, this.formDataAlter.hardwareId, this.formDataAlter.hardwarePort)
+        if (res.data === true) {
+          this.$message.success('修改成功')
           this.hardwareLoad()
         } else {
-          this.$message.success("修改失败")
+          this.$message.success('修改失败')
         }
         this.showChangeHardware = false
       }
     },
-    hsub() {
+    hsub () {
       if (this.$refs.ccomp.formData != null) {
         this.showChangeh = false
         this.showMask = false
@@ -385,51 +372,44 @@ export default {
           }
         }
       } else {
-        this.$message.warning("有输入框未填写哦")
+        this.$message.warning('有输入框未填写哦')
       }
     },
-    changeStatus(k) {
-      let that = this
-      this.$confirm("请问是否要更改此硬件的状态", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
+    changeStatus (k) {
+      const that = this
+      this.$confirm('请问是否要更改此硬件的状态', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消'
       })
         .then(async () => {
-          const { data: res } = await that.$http.put(
-            "/hardwares/" + that.HardwareList[k].id,
-            {
-              status: that.HardwareList[k].status == true ? 0 : 1,
-            }
-          )
-          if (res.data == true) {
-            that.$message.success("修改成功")
+          const { data: res } = await putChangeHardwareStatus(this.formDataAlter.hardwarePortd, that.HardwareList[k].status)
+          if (res.data === true) {
+            that.$message.success('修改成功')
             that.hardwareLoad()
           }
         })
         .catch(() => {
-          that.$message.info("取消修改")
+          that.$message.info('取消修改')
         })
     },
-    delHardware(k) {
-      let that = this
-      this.$confirm("请问是否要删除此硬件", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
+    delHardware (k) {
+      const that = this
+      this.$confirm('请问是否要删除此硬件', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消'
       })
         .then(async () => {
-          const { data: res } = await that.$http.delete(
-            "/hardwares/" + that.HardwareList[k].id
-          )
-          if (res.data == true) {
-            that.$message.success("删除成功")
+          const { data: res } = await deleteHardwareById(that.HardwareList[k].id)
+          if (res.data === true) {
+            that.$message.success('删除成功')
             that.hardwareLoad()
           }
         })
         .catch(() => {
-          that.$message.info("取消删除")
+          that.$message.info('取消删除')
         })
-    },
-  },
+    }
+  }
 }
 </script>
 
