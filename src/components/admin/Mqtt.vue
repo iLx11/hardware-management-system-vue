@@ -190,6 +190,11 @@ export default {
   box-shadow: insert var(--bgshadow1);
   overflow: scroll;
   font-size: 18px;
+  scrollbar-width: none; /* firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 /*MQTT消息*/
 .messBox {

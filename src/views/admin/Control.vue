@@ -63,15 +63,8 @@
               </div>
             </div>
           </div>
-          <section class="bar">
-            <input
-              @mousedown="analogShow(k)"
-              class="bar-input analogInp"
-              type="range"
-              min="0"
-              max="100"
-              value="100"
-            />
+          <section class="bar" ref="barBox">
+            <input @mousedown="analogShow(k)" class="bar-input analogInp" type="range" min="0" max="100" value="100" />
             <div class="ind">100%</div>
           </section>
         </div>
@@ -86,12 +79,8 @@
               <h4 class="state">Close</h4>
               <h4>success</h4>
             </div>
-            <div @click="SPSWControl(k, 'open')" class="con_o">
-              &nbsp;&nbsp;open
-            </div>
-            <div @click="SPSWControl(k, 'close')" class="con_c">
-              close&nbsp;&nbsp;
-            </div>
+            <div @click="SPSWControl(k, 'open')" class="con_o">&nbsp;&nbsp;open</div>
+            <div @click="SPSWControl(k, 'close')" class="con_c">close&nbsp;&nbsp;</div>
           </div>
         </div>
       </div>
@@ -111,11 +100,11 @@ export default {
       hardwareLength: 0
     }
   },
-  created () {
+  mounted () {
     this.userLoad()
     this.hardwareLoad()
     // let hardwareIP = "http://192.168.0.111"
-    const hardwareIP = 'http://192.168.43.95'
+    const hardwareIP = 'http://192.168.0.200'
     localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
   },
   methods: {
@@ -132,34 +121,22 @@ export default {
       // 区分不同的硬件分类
       const pattern1 = /^AGSW/
       const pattern2 = /^SPSW/
-      this.AnaList = HardwareList.filter(o => pattern1.test(o.hardwareId))
-      this.SpList = HardwareList.filter(o => pattern2.test(o.hardwareId))
+      this.AnaList = HardwareList.filter((o) => pattern1.test(o.hardwareId))
+      this.SpList = HardwareList.filter((o) => pattern2.test(o.hardwareId))
     },
     // 模拟引脚显示
     analogShow (k, ev) {
       const that = this
-      const barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
-      if (ev.target.parentNode.parentNode.nextSibling.style.display === 'none') {
-        ev.target.parentNode.parentNode.nextSibling.style.display = 'block'
-        const indicator =
-          ev.target.parentNode.parentNode.nextSibling.children[1].children[0]
-        // let barIn = $(".bar-input").eq(k)[0]
-        // 模拟控制输入框改变
-        barIn.addEventListener('change', function () {
-          indicator.innerHTML = barIn.value + '%'
-          indicator.style.marginLeft = barIn.value + '%'
-          that.AnaGet(k, 'pwm', barIn.value)
-        })
-        // 实时改变
-        barIn.addEventListener('touchmove', function () {
-          indicator.innerHTML = barIn.value + '%'
-          indicator.style.marginLeft = barIn.value + '%'
-          that.AnaGet(k, 'pwm', barIn.value)
-        })
-      } else {
-        ev.target.parentNode.parentNode.nextSibling.style.display = 'none'
-        barIn.removeEventListener('click')
-        barIn.removeEventListener('change')
+      const barIn = this.$refs.barBox[k].childNodes[0]
+      const indicator = this.$refs.barBox[k].childNodes[1]
+      // 模拟控制输入框改变
+      barIn.onchange = function () {
+        indicator.innerHTML = barIn.value + '%'
+        that.AnaGet(k, 'pwm', barIn.value)
+      }
+      barIn.ontouchmove = function () {
+        indicator.innerHTML = barIn.value + '%'
+        that.AnaGet(k, 'pwm', barIn.value)
       }
     },
     // 模拟控制组件中的简单硬件控制
@@ -180,16 +157,18 @@ export default {
       // 读取@硬件8266IP
       const hIP = localStorage.getItem('hardwareIP') // 读取函数
       const num = this.SpList[k].hardwareId.substring(4)
-      const json = JSON.stringify({
+      const json = {
         hardwarePort: this.SpList[k].hardwarePort,
         instruction: ins,
         num: ''
-      })
+      }
       if (num === '02' || num === '03') {
         json.num = 'relay'
       } else {
         json.num = 'motor'
       }
+      // json = JSON.stringify(json)
+      console.log(json, hIP, num)
       const { data: res } = await SPSWControl(hIP, num, json)
       console.log(res)
       this.$message.success(this.SpList[k].name + '操作成功')
@@ -228,7 +207,7 @@ export default {
   top: -4em;
   left: -4em;
   background: rgba(0, 0, 0, 0.1);
-  background: url("../../assets/img/sun.png") no-repeat;
+  background: url('../../assets/img/sun.png') no-repeat;
   background-size: contain;
   z-index: 1;
   transition: transform 0.6s ease;
@@ -243,7 +222,7 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  font-family: "youshe";
+  font-family: 'youshe';
   color: rgba(51, 51, 51, 0.7);
 }
 
@@ -264,13 +243,13 @@ export default {
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
-  font-family: "youshe";
+  font-family: 'youshe';
 }
 .contentData div h1 {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
-  font-family: "youshe";
+  font-family: 'youshe';
   font-size: 32px;
   color: rgba(51, 51, 51, 0.8);
 }
@@ -285,10 +264,22 @@ export default {
   border-radius: 25px;
   display: flex;
   flex-flow: row wrap;
-  justify-content: start;
+  justify-content: space-between;
   align-items: flex-start;
-  padding: 1em 0.7em;
+  align-content: flex-start;
+  padding: 1em 1.2em;
   overflow-y: scroll;
+  scrollbar-width: none; /* firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  .ANcontrol {
+    width: 30%;
+  }
+  .SPcontrol {
+    width: 30%;
+  }
+}
+.HWcontrol::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
 }
 
 .C_t {
@@ -299,11 +290,11 @@ export default {
   margin-bottom: 0.9em;
   /*margin-right: 0.9em;*/
   background: rgba(255, 255, 255, 0.8);
-  margin-right: 2.2em;
+  // margin-right: 2.2em;
 }
 
 .ct {
-  width: 12em;
+  width: 100%;
   height: 5em;
   display: flex;
   justify-content: space-between;
@@ -313,7 +304,7 @@ export default {
 }
 
 .open {
-  width: 53%;
+  width: 50%;
   height: 96px;
   box-shadow: 2px 6px 20px 5px rgba(211, 215, 212, 0.6);
   border-radius: 13px;
@@ -401,6 +392,7 @@ export default {
 /*简单控制开始*/
 /*-----------------------------------------------------------*/
 .ct_sp {
+  width: 100%;
   box-shadow: var(--bgshadow2);
   border-radius: 15px;
   padding: 0.5em;
@@ -410,7 +402,7 @@ export default {
 }
 
 .con_open {
-  width: 12em;
+  width: 100%;
   height: 9em;
   box-shadow: 2px 6px 15px 1px rgba(211, 215, 212, 0.9);
   border-radius: 13px;
@@ -445,11 +437,7 @@ export default {
   width: 49%;
   height: 40%;
   background-color: rgba(255, 222, 233, 0.2);
-  background-image: linear-gradient(
-    0deg,
-    rgba(255, 222, 233, 0.1) 0%,
-    rgba(181, 208, 207, 0.3) 100%
-  );
+  background-image: linear-gradient(0deg, rgba(255, 222, 233, 0.1) 0%, rgba(181, 208, 207, 0.3) 100%);
 
   border-radius: 12px 7px 5px 12px;
   /*clip-path: polygon(0% 0%, 50% 0%, 50% 50%, 100% 50%, 100% 100%, 0% 100%);*/
@@ -462,11 +450,7 @@ export default {
   width: 49%;
   height: 40%;
   background-color: rgba(255, 222, 233, 0.2);
-  background-image: linear-gradient(
-    0deg,
-    rgba(255, 222, 233, 0.1) 0%,
-    rgba(181, 208, 207, 0.3) 100%
-  );
+  background-image: linear-gradient(0deg, rgba(255, 222, 233, 0.1) 0%, rgba(181, 208, 207, 0.3) 100%);
 
   border-radius: 5px 12px 12px 5px;
   /*clip-path: polygon(0% 50%, 50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%);*/

@@ -2,7 +2,7 @@
   <!-- 表单开始 -->
   <section>
     <div class="kalada">
-      <div class="sub">
+      <div class="sub"  ref="subHeight">
         <div class="drop-shadow">
           <div class="glass"></div>
           <!-- <span>GLASS</span> -->
@@ -55,6 +55,11 @@ export default {
         password: ''
       }
     }
+  },
+  mounted () {
+    const ch = document.documentElement.clientHeight
+    console.log(ch)
+    this.$refs.subHeight.style.height = ch + 'px'
   },
   methods: {
     async hasUser () {

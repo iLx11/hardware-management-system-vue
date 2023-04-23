@@ -13,7 +13,8 @@ module.exports = defineConfig({
   publicPath: './',
   devServer: {
     // host: '192.168.43.80',
-    host: 'localhost',
+    host: '192.168.0.112',
+    // host: 'localhost',
     port: 8084,
     open: true, // vue项目启动时自动打开浏览器
     proxy: {

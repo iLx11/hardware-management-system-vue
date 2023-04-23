@@ -29,6 +29,11 @@ html,
   font-family: "youshe";
   src: url("./assets/font/YSHaoShenTi.ttf");
 }
+
+/* @font-face {
+  font-family: "ceyy";
+  src: url("./assets/font/ceyy.ttf");
+} */
 .icon {
   width: 1.8em;
   height: 1.8em;

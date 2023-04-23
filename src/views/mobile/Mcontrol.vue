@@ -2,6 +2,10 @@
   <!-- kalada_c开始 -->
   <!------------------------------------------------------------>
   <section class="kalada_c">
+    <!-- 摄像头监控画面 -->
+    <div id="model-content" v-if="videoShow">
+      <iframe src="http://192.168.0.114/mjpeg/1" frameborder="0" scorlling="no" id="iframeVideo" ref="iframeRef"> 你的浏览器不支持iframe </iframe>
+    </div>
     <!-- 数据显示开始 -->
     <!------------------------------------------------------------>
     <section>
@@ -15,9 +19,9 @@
                   <h4>success</h4>
                 </h1>
               </div>
-              <div class="content_data">
-                <div class="contentData">
-                  <div class="weather">
+              <div id="content_data">
+                <div id="contentData">
+                  <div id="weather">
                     <h3>Weather:</h3>
                     <div>
                       <span></span>
@@ -46,14 +50,7 @@
                     <h3>MQTT</h3>
                     <h5>connect</h5>
                   </label>
-                  <input
-                    type="text"
-                    name=""
-                    placeholder="mqtt server address"
-                    id="mqt"
-                    v-model="mqttInp"
-                    @blur="MQTTConnect"
-                  />
+                  <input type="text" name="" placeholder="mqtt server address" id="mqt" v-model="mqttInp" @blur="MQTTConnect" />
                 </div>
                 <p id="mqtt_sit" style="font-size: 5px">CONNECTED</p>
               </div>
@@ -71,16 +68,13 @@
           <div class="ct ab">
             <div class="open led_open">
               <div class="led_situation">
+                <h3 ref="stateA">Close</h3>
                 <h1>
-                  {{ v.name }}:&nbsp;
-                  <div class="state">Close</div>
-                  <br />
-                  <h4>success</h4>
+                  {{ v.name }}
                 </h1>
+                <h4>success</h4>
               </div>
-              <div @click="analogShow(k, $event)" class="analog led_analog">
-                模拟调整
-              </div>
+              <div @click="analogShow(k)" class="analog led_analog">模拟调整</div>
             </div>
             <div class="switch led_switch">
               <div class="o_n led_on" @click="AnaSwitch(k, 'open')">
@@ -91,14 +85,8 @@
               </div>
             </div>
           </div>
-          <section class="bar">
-            <input
-              class="bar-input analogInp"
-              type="range"
-              min="0"
-              max="100"
-              value="100"
-            />
+          <section class="bar" ref="barBox">
+            <input class="bar-input analogInp" type="range" min="0" max="100" value="100" />
             <div class="ind">
               <div class="indicator">100%</div>
             </div>
@@ -108,26 +96,18 @@
     </section>
     <!------------------------------------------------------------>
     <!-- 简单控制开始 -->
-    <section>
-      <div class="content" :key="v.id" v-for="(v, k) in SpList">
-        <div class="C_t">
-          <div class="ct">
+    <section id="spc-section">
+      <div class="content-spc" :key="v.id" v-for="(v, k) in SpList">
+        <div class="C_t_spc">
+          <div class="ct_spc">
             <div class="con_open">
               <div class="con_situation">
-                <h1>
-                  {{ v.name }}<br />
-                  <h4>
-                    success&nbsp;&nbsp;&nbsp;&nbsp;
-                    <div class="state">Close</div>
-                  </h4>
-                </h1>
+                <h1>{{ v.name }}</h1>
+                <h4>success</h4>
+                <div ref="stateS">Close</div>
               </div>
-              <div @click="SPSWControl(k, 'open')" class="con_o door_o">
-                &nbsp;&nbsp;open
-              </div>
-              <div @click="SPSWControl(k, 'close')" class="con_c door_c">
-                close&nbsp;&nbsp;
-              </div>
+              <div @click="SPSWControl(k, 'open')" class="con_o door_o">OPEN</div>
+              <div @click="SPSWControl(k, 'close')" class="con_c door_c">CLOSE</div>
             </div>
           </div>
         </div>
@@ -149,7 +129,9 @@ import mqtt from 'mqtt'
 import { getHardwareList, AGSWControl, SPSWControl } from '@/API/hardwareAPI'
 export default {
   data: function () {
+    this.AnaGet = this.throttle(this.AnaGet, 630)
     return {
+      videoShow: false,
       AnaList: [],
       SpList: [],
       mqttInp: '',
@@ -164,14 +146,13 @@ export default {
   created () {
     this.hardwareLoad()
     // let hardwareIP = "http://192.168.0.110"
-    const hardwareIP = 'http://192.168.43.95'
+    const hardwareIP = 'http://192.168.0.200'
     localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
   },
   methods: {
     // 连接MQTT服务器
     MQTTConnect () {
-      console.log('123123')
-      if (this.mqttInp == null || this.mqttInp == '') {
+      if (this.mqttInp == null || this.mqttInp === '') {
         this.$message.warning('服务器地址为空')
       } else {
         // 给父组件传值
@@ -191,46 +172,67 @@ export default {
         })
       }
     },
+    throttle (func, wait) {
+      let timeout = null
+      return function () {
+        const context = this
+        const args = arguments
+        if (!timeout) {
+          timeout = setTimeout(() => {
+            timeout = null
+            func.apply(context, args)
+          }, wait)
+        }
+      }
+    },
     async hardwareLoad () {
       const { data: res } = await getHardwareList()
       this.hardwareLength = res.data.length
       const HardwareList = res.data
       const pattern1 = /^AGSW/
       const pattern2 = /^SPSW/
-      this.AnaList = HardwareList.filter(o => pattern1.test(o.hardwareId))
-      this.SpList = HardwareList.filter(o => pattern2.test(o.hardwareId))
+      this.AnaList = HardwareList.filter((o) => pattern1.test(o.hardwareId))
+      this.SpList = HardwareList.filter((o) => pattern2.test(o.hardwareId))
     },
     // 模拟引脚显示
-    analogShow (k, ev) {
+    analogShow (k) {
       const that = this
-      const barIn = ev.target.parentNode.parentNode.nextSibling.children[0]
-      if (ev.target.parentNode.parentNode.nextSibling.style.display === 'none') {
-        ev.target.parentNode.parentNode.nextSibling.style.display = 'block'
-        const indicator =
-          ev.target.parentNode.parentNode.nextSibling.children[1].children[0]
-        // let barIn = $(".bar-input").eq(k)[0]
-        barIn.addEventListener('change', function () {
+      const barIn = this.$refs.barBox[k].childNodes[0]
+      const indicator = this.$refs.barBox[k].childNodes[1].childNodes[0]
+      const barBoxDisplay = this.$refs.barBox[k].style.display
+      this.$refs.stateA[k].innerHTML = 'Open'
+      if (barBoxDisplay === 'none') {
+        this.$refs.barBox[k].style.display = 'block'
+        if (this.AnaList[k].hardwareId === 'AGSW11' && this.AnaList[k].name.substring(0, 3) === 'cam') {
+          this.videoShow = true
+        }
+        barIn.onchange = function () {
           indicator.innerHTML = barIn.value + '%'
           indicator.style.marginLeft = barIn.value + '%'
           that.AnaGet(k, 'pwm', barIn.value)
-        })
+        }
+
         // 实时改变
-        barIn.addEventListener('touchmove', function () {
+        barIn.ontouchmove = function () {
           indicator.innerHTML = barIn.value + '%'
           indicator.style.marginLeft = barIn.value + '%'
           that.AnaGet(k, 'pwm', barIn.value)
-        })
+        }
       } else {
-        ev.target.parentNode.parentNode.nextSibling.style.display = 'none'
-        barIn.removeEventListener('click')
-        barIn.removeEventListener('change')
+        this.$refs.barBox[k].style.display = 'none'
+        this.$refs.stateA[k].innerHTML = 'Close'
+        if (this.AnaList[k].hardwareId === 'AGSW11') {
+          this.videoShow = false
+        }
+        barIn.removeEventListener('change', barIn)
+        barIn.removeEventListener('touchmove', barIn)
       }
     },
     // 模拟控制硬件简单控制
     AnaSwitch (k, ins) {
       this.AnaGet(k, ins)
-      console.log(ins)
-      console.log(this.AnaList[k].hardwareId.substring(4))
+      ins === 'open' ? (this.$refs.stateA[k].innerHTML = 'Open') : (this.$refs.stateA[k].innerHTML = 'Close')
+      // console.log(this.AnaList[k].hardwareId.substring(4))
     },
     async AnaGet (k, ins, pwm = 0) {
       // 读取硬件8266IP
@@ -244,11 +246,12 @@ export default {
       // 读取@硬件8266IP
       const hIP = localStorage.getItem('hardwareIP') // 读取函数
       const num = this.SpList[k].hardwareId.substring(4)
-      const json = JSON.stringify({
+      ins === 'open' ? (this.$refs.stateS[k].innerHTML = 'Open') : (this.$refs.stateS[k].innerHTML = 'Close')
+      const json = {
         hardwarePort: this.SpList[k].hardwarePort,
         instruction: ins,
         num: ''
-      })
+      }
       if (num === '02' || num === '03') {
         json.num = 'relay'
       } else {
@@ -271,6 +274,28 @@ export default {
 @bgshadow2: 3px 4px 12px 3px rgba(111, 109, 133, 0.13);
 @font-color-1: rgba(130, 174, 175, 0.9);
 @font-color-2: rgba(51, 51, 51, 0.8);
+
+#model-content {
+  width: 100%;
+  height: 400px;
+  max-width: 100%;
+  position: fixed;
+  top: 0%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  z-index: 66;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  #iframeVideo {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transform: scale(0.9) rotate(-90deg) translateY(0%);
+  }
+}
+
 .state {
   display: inline-block;
 }
@@ -280,7 +305,22 @@ export default {
   margin: auto;
 }
 
-.C_t {
+#spc-section {
+  width: 95%;
+  margin: 0 auto;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+.content-spc {
+  width: 48%;
+}
+
+.C_t,
+.C_t_spc {
   width: 100%;
   height: auto;
   margin: auto;
@@ -291,7 +331,8 @@ export default {
   background: rgba(255, 255, 255, 0.8);
 }
 
-.ct {
+.ct,
+.ct_spc {
   width: 100%;
   height: auto;
   display: flex;
@@ -321,13 +362,13 @@ export default {
     border-radius: 0 0 15px 15px;
     padding: 0.2em;
   }
-  .content_data {
+  #content_data {
     width: 100%;
     height: 35%;
     position: absolute;
-    bottom: 30%;
+    bottom: 37%;
     background-color: rgba(231, 238, 238, 0.6);
-    .contentData {
+    #contentData {
       width: 90%;
       height: 100%;
       margin: 0 auto;
@@ -335,6 +376,10 @@ export default {
       flex-flow: column nowrap;
       justify-content: space-around;
       align-items: center;
+      // font-family: "ceyy" !important;
+      h3 {
+        color: rgba(51, 51, 51, 0.8) !important;
+      }
       div {
         width: 100%;
         height: 30%;
@@ -384,6 +429,7 @@ export default {
       width: 20%;
       margin-right: 1em;
       transform: translateY(-6px);
+      color: rgba(51, 51, 51, 0.8) !important;
     }
   }
   #mqtt_sit {
@@ -406,13 +452,25 @@ export default {
 
 .led_situation {
   width: 100%;
-  color: @font-color-2;
+  height: 70%;
   z-index: 5;
-  h1,
+  font-size: 18px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  align-content: flex-end;
+  align-items: flex-end;
+  text-align: center;
+  padding: 0.3em;
+  h1 {
+    font-size: 30px;
+    color: rgba(51, 51, 51, 0.7);
+    align-self: center;
+  }
+  h3,
   h4 {
-    font-size: 16px;
-    margin-left: 0.6em;
-    margin-top: 0.4em;
+    font-size: 10px;
+    color: rgba(130, 174, 175, 0.8);
   }
 }
 
@@ -512,7 +570,7 @@ export default {
 }
 
 .indicator:before {
-  content: "";
+  content: '';
   position: absolute;
   background: #ec0071;
   left: 0;
@@ -535,7 +593,7 @@ export default {
 /*-----------------------------------------------------------*/
 .con_open {
   width: 100%;
-  height: 70px;
+  height: 100px;
   box-shadow: 2px 6px 15px 1px rgba(211, 215, 212, 0.9);
   border-radius: 13px;
   position: relative;
@@ -545,12 +603,12 @@ export default {
 }
 
 .con_situation {
-  width: 50%;
+  width: 70%;
   position: absolute;
   text-align: center;
-  top: 0px;
+  top: -9px;
   left: 50%;
-  margin-left: -25%;
+  transform: translate(-50%, 0);
   z-index: 5;
   color: @font-color-1;
   border: 1.5px solid rgba(211, 215, 212, 0.8);
@@ -558,10 +616,16 @@ export default {
   border-radius: 0 0 15px 15px;
   padding: 0.2em;
   background-color: rgba(255, 255, 255, 0.8);
-
-  h1,
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: flex-start;
+  .state,
   h4 {
-    font-size: 16px;
+    font-size: 13px;
+  }
+  h1 {
     color: rgba(51, 51, 51, 0.7);
   }
 }
@@ -570,33 +634,33 @@ export default {
   width: 49%;
   height: 100%;
   background-color: rgba(255, 222, 233, 0.2);
-  background-image: linear-gradient(
-    0deg,
-    rgba(255, 222, 233, 0.1) 0%,
-    rgba(181, 208, 207, 0.3) 100%
-  );
-
+  background-image: linear-gradient(0deg, rgba(250, 241, 244, 0.1) 0%, rgba(200, 219, 219, 0.2) 100%);
   border-radius: 12px 7px 5px 12px;
   clip-path: polygon(0% 0%, 50% 0%, 50% 50%, 100% 50%, 100% 100%, 0% 100%);
   z-index: 2;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 0.4em;
+  color: rgba(51, 51, 51, 0.6);
 }
 
 .con_c {
   width: 49%;
   height: 100%;
   background-color: rgba(255, 222, 233, 0.2);
-  background-image: linear-gradient(
-    0deg,
-    rgba(255, 222, 233, 0.1) 0%,
-    rgba(181, 208, 207, 0.3) 100%
-  );
-
+  background-image: linear-gradient(0deg, rgba(255, 222, 233, 0.1) 0%, rgba(181, 208, 207, 0.3) 100%);
   border-radius: 5px 12px 12px 5px;
   clip-path: polygon(0% 50%, 50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%);
   text-align: right;
   z-index: 2;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 0.4em;
+  color: rgba(51, 51, 51, 0.6);
 }
 
 .zhanwei {

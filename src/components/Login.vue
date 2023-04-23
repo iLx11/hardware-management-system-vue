@@ -2,29 +2,18 @@
   <!-- 表单开始 -->
   <section>
     <div class="kalada">
-      <div class="sub">
+      <div class="sub" ref="subHeight">
         <div class="drop-shadow">
           <div class="glass"></div>
           <div class="login-box">
             <h2>LogIn</h2>
             <form :model="formData">
               <div class="user-box">
-                <input
-                  type="text"
-                  v-model="formData.name"
-                  name=""
-                  id="user"
-                  autocomplete="off"
-                />
+                <input type="text" v-model="formData.name" name="" id="user" autocomplete="off" />
                 <label>Username</label>
               </div>
               <div class="user-box">
-                <input
-                  type="password"
-                  v-model="formData.password"
-                  name=""
-                  id="password"
-                />
+                <input type="password" v-model="formData.password" name="" id="password" />
                 <label>Password</label>
               </div>
               <a href="javascript:void(0)" id="sub" @click="submit">
@@ -55,6 +44,10 @@ export default {
         password: ''
       }
     }
+  },
+  mounted () {
+    const ch = document.documentElement.clientHeight
+    this.$refs.subHeight.style.height = ch + 'px'
   },
   methods: {
     async submit (res) {
@@ -101,7 +94,7 @@ export default {
 .sub {
   width: 100%;
   height: 43.5em;
-  background-image: url("../assets/img/3.jpg");
+  background-image: url('../assets/img/3.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -113,7 +106,7 @@ export default {
 .glass {
   height: 100%;
   width: 100%;
-  background-image: url("../assets/img/3.jpg");
+  background-image: url('../assets/img/3.jpg');
   background-size: cover;
   background-position: center;
   clip-path: inset(9em);
@@ -235,8 +228,7 @@ export default {
   background: #94f2f7;
   color: #fff;
   border-radius: 5px;
-  box-shadow: 0 0 5px #94f2f7, 0 0 25px #94f2f7, 0 0 50px #94f2f7,
-    0 0 100px #94f2f7;
+  box-shadow: 0 0 5px #94f2f7, 0 0 25px #94f2f7, 0 0 50px #94f2f7, 0 0 100px #94f2f7;
 }
 
 .login-box a span {
