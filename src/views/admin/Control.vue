@@ -1,25 +1,28 @@
 <template>
   <section class="controlPage">
+    <div id="model-content" v-if="videoShow">
+      <iframe src="" frameborder="0" scorlling="no" id="iframeVideo" ref="iframeRef"> 你的浏览器不支持iframe </iframe>
+    </div>
     <div class="headData">
-      <div class="weatherImg"></div>
-      <div class="contentData">
+      <div class="weatherImg" ref="weatherImgRef"></div>
+      <div class="contentData" @click="getWeatherNow">
         <div class="weather">
           <h1>
-            <span>Sun</span>
+            <span>{{ weather }}</span>
             <p></p>
           </h1>
           <span>Weather</span>
         </div>
         <div class="temp">
           <h1>
-            <span>26</span>
+            <span>{{ temp }}</span>
             <p>℃</p>
           </h1>
           <span>Temperature</span>
         </div>
         <div class="hum">
           <h1>
-            <span>30</span>
+            <span>{{ hum }}</span>
             <p>%RH</p>
           </h1>
           <span>humidity</span>
@@ -49,7 +52,7 @@
             <div class="open">
               <div class="situation">
                 <h1>{{ v.name }}</h1>
-                <h4 class="state">Close</h4>
+                <h4 class="state" ref="stateA">Close</h4>
                 <h4>success</h4>
               </div>
               <!-- <div @click="analogShow(k)" class="analog led_analog">模拟调整</div> -->
@@ -76,7 +79,7 @@
           <div class="con_open">
             <div class="con_situation">
               <h1>{{ v.name }}</h1>
-              <h4 class="state">Close</h4>
+              <h4 class="state" ref="stateS">Close</h4>
               <h4>success</h4>
             </div>
             <div @click="SPSWControl(k, 'open')" class="con_o">&nbsp;&nbsp;open</div>
@@ -90,24 +93,54 @@
 
 <script>
 import { getUserList } from '@/API/userAPI.js'
-import { getHardwareList, AGSWControl, SPSWControl } from '@/API/hardwareAPI.js'
+import { getHardwareList, AGSWControl, SPSWControl, getWeatherByAPI } from '@/API/hardwareAPI.js'
 export default {
   data: function () {
     return {
       AnaList: [],
       SpList: [],
       userLength: 0,
-      hardwareLength: 0
+      hardwareLength: 0,
+      videoShow: false,
+      weather: 'Sun',
+      temp: '26',
+      hum: '30'
     }
   },
   mounted () {
     this.userLoad()
     this.hardwareLoad()
-    // let hardwareIP = "http://192.168.0.111"
-    const hardwareIP = 'http://192.168.0.200'
-    localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
+    // // let hardwareIP = "http://192.168.0.111"
+    // const hardwareIP = 'http://192.168.0.200'
+    // localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
+    this.getWeatherNow()
   },
   methods: {
+    async getWeatherNow () {
+      const { data: res } = await getWeatherByAPI()
+      if (res.code === '200') {
+        this.hum = res.now.humidity
+        this.temp = res.now.temp
+        switch (res.now.text) {
+          case '阴':
+            this.weather = 'Cloudy'
+            this.$refs.weatherImgRef.style.background = 'url("https://img.gejiba.com/images/06456c33512859a79f10366344bfb51a.png") no-repeat 100% 100%/ contain'
+            break
+          case '晴':
+            this.weather = 'Sun'
+            this.$refs.weatherImgRef.style.background = 'url("https://img.gejiba.com/images/99ae4fde22fc8dbfe41937c67f28ae9d.png") no-repeat 100% 100%/ contain'
+            break
+          case '雨':
+            this.weather = 'Rain'
+            this.$refs.weatherImgRef.style.background = 'url("https://img.gejiba.com/images/23dd5ea25996a95a3733d97e362a4828.png") no-repeat 100% 100%/ contain'
+            break
+          case '雪':
+            this.weather = 'Snow'
+            this.$refs.weatherImgRef.style.background = 'url("https://img.gejiba.com/images/8a4683be857dc8481b4f242022266a57.png") no-repeat 100% 100%/ contain'
+            break
+        }
+      }
+    },
     async userLoad () {
       // 获取用户列表
       const { data: res } = await getUserList()
@@ -117,7 +150,9 @@ export default {
       // 获取硬件列表
       const { data: res } = await getHardwareList()
       this.hardwareLength = res.data.length
-      const HardwareList = res.data
+      let HardwareList = res.data
+      // 过滤禁用的硬件
+      HardwareList = HardwareList.filter(o => o.status)
       // 区分不同的硬件分类
       const pattern1 = /^AGSW/
       const pattern2 = /^SPSW/
@@ -142,8 +177,19 @@ export default {
     // 模拟控制组件中的简单硬件控制
     AnaSwitch (k, ins) {
       this.AnaGet(k, ins)
-      console.log(ins)
-      console.log(this.AnaList[k].hardwareId.substring(4))
+      let timeOut = null
+      if (ins === 'open') {
+        this.$refs.stateA[k].innerHTML = 'Open'
+        this.videoShow = true
+        timeOut = setTimeout(() => {
+          const videoIP = window.localStorage.getItem('videoIP')
+          this.$refs.iframeRef.src = videoIP
+        }, 300)
+      } else {
+        clearTimeout(timeOut)
+        this.$refs.stateA[k].innerHTML = 'Close'
+        this.videoShow = false
+      }
     },
     async AnaGet (k, ins, pwm = 0) {
       // 读取硬件8266IP
@@ -157,6 +203,7 @@ export default {
       // 读取@硬件8266IP
       const hIP = localStorage.getItem('hardwareIP') // 读取函数
       const num = this.SpList[k].hardwareId.substring(4)
+      ins === 'open' ? (this.$refs.stateS[k].innerHTML = 'Open') : (this.$refs.stateS[k].innerHTML = 'Close')
       const json = {
         hardwarePort: this.SpList[k].hardwarePort,
         instruction: ins,
@@ -180,6 +227,27 @@ export default {
 <style lang="less">
 /*控制页面*/
 /*-------------------------------------------------------------*/
+#model-content {
+  width: 24%;
+  height: 400px;
+  max-width: 100%;
+  position: fixed;
+  top: 20%;
+  right: 0%;
+  // transform: translate(-50%, -20%);
+  z-index: 66;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: scroll;
+  #iframeVideo {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    // transform: rotate(-90deg) translateY(0%);
+  }
+}
+
 .controlPage {
   width: 100%;
   height: 100%;
@@ -207,8 +275,8 @@ export default {
   top: -4em;
   left: -4em;
   background: rgba(0, 0, 0, 0.1);
-  background: url('../../assets/img/sun.png') no-repeat;
-  background-size: contain;
+  background: url('https://img.gejiba.com/images/99ae4fde22fc8dbfe41937c67f28ae9d.png') no-repeat 100% 100%/ contain;
+  // background-size: contain;
   z-index: 1;
   transition: transform 0.6s ease;
 }

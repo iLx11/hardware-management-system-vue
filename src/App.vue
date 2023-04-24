@@ -7,14 +7,26 @@
 <script>
 export default {
   name: 'app',
-  components: {}
+  components: {},
+  mounted () {
+    // let hardwareIP = "http://192.168.0.111"
+    const hardwareIP = 'http://192.168.0.200'
+    localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
+    const videoIP = 'http://192.168.0.114/mjpeg/1'
+    localStorage.setItem('videoIP', videoIP)
+  }
 }
 </script>
 
 <style>
+@media screen and (max-width: 500px) {
+  .el-message-box {
+    width: 300px !important;
+  }
+}
 body,
 html,
-#app{
+#app {
   width: 100%;
   height: 100%;
   padding: 0;
@@ -26,8 +38,8 @@ html,
   box-sizing: border-box;
 }
 @font-face {
-  font-family: "youshe";
-  src: url("./assets/font/YSHaoShenTi.ttf");
+  font-family: 'youshe';
+  src: url('./assets/font/YSHaoShenTi.ttf');
 }
 
 /* @font-face {

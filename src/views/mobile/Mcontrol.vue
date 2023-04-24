@@ -3,8 +3,10 @@
   <!------------------------------------------------------------>
   <section class="kalada_c">
     <!-- 摄像头监控画面 -->
+    <div id="use-gyroscope" @click="useGyroscope" v-if="videoShow">使用陀螺仪</div>
+
     <div id="model-content" v-if="videoShow">
-      <iframe src="http://192.168.0.114/mjpeg/1" frameborder="0" scorlling="no" id="iframeVideo" ref="iframeRef"> 你的浏览器不支持iframe </iframe>
+      <iframe src="" frameborder="0" scorlling="no" id="iframeVideo" ref="iframeRef"> 你的浏览器不支持iframe </iframe>
     </div>
     <!-- 数据显示开始 -->
     <!------------------------------------------------------------>
@@ -20,25 +22,25 @@
                 </h1>
               </div>
               <div id="content_data">
-                <div id="contentData">
+                <div id="contentData" @click="getWeatherNow">
                   <div id="weather">
                     <h3>Weather:</h3>
                     <div>
                       <span></span>
-                      <p>Sun</p>
+                      <p>{{ weather }}</p>
                     </div>
                   </div>
                   <div class="temp">
                     <h3>Temperature:</h3>
                     <div>
-                      <span>26</span>
+                      <span>{{ temp }}</span>
                       <p>℃</p>
                     </div>
                   </div>
                   <div class="hum">
                     <h3>humidity:</h3>
                     <div>
-                      <span>30</span>
+                      <span>{{ hum }}</span>
                       <p>%RH</p>
                     </div>
                   </div>
@@ -106,8 +108,8 @@
                 <h4>success</h4>
                 <div ref="stateS">Close</div>
               </div>
-              <div @click="SPSWControl(k, 'open')" class="con_o door_o">OPEN</div>
-              <div @click="SPSWControl(k, 'close')" class="con_c door_c">CLOSE</div>
+              <div @click="SPSWControl(k, 'open')" class="con_o door_o">open</div>
+              <div @click="SPSWControl(k, 'close')" class="con_c door_c">close</div>
             </div>
           </div>
         </div>
@@ -126,30 +128,58 @@
 
 <script>
 import mqtt from 'mqtt'
-import { getHardwareList, AGSWControl, SPSWControl } from '@/API/hardwareAPI'
+import { getHardwareList, AGSWControl, SPSWControl, gyrocopeControl, getWeatherByAPI } from '@/API/hardwareAPI'
 export default {
   data: function () {
-    this.AnaGet = this.throttle(this.AnaGet, 630)
+    this.AnaGet = this.throttle(this.AnaGet, 330)
+    this.gyrocopeCam = this.throttle(this.gyrocopeCam, 530)
     return {
       videoShow: false,
       AnaList: [],
       SpList: [],
       mqttInp: '',
+      isgyro: false,
       options: {
         // mqtt客户端id
         // clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
         clientId: '75ee4e39450943889749e9924e3a982c'
         // connectTimeout: 3,
-      }
+      },
+      weather: 'Sun',
+      temp: '26',
+      hum: '30'
     }
   },
   created () {
     this.hardwareLoad()
-    // let hardwareIP = "http://192.168.0.110"
-    const hardwareIP = 'http://192.168.0.200'
-    localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
+    // // let hardwareIP = "http://192.168.0.110"
+    // const hardwareIP = 'http://192.168.0.200'
+    // localStorage.setItem('hardwareIP', hardwareIP) // 储存函数
+    // // this.useGyroscope()
+    this.getWeatherNow()
   },
   methods: {
+    async getWeatherNow () {
+      const { data: res } = await getWeatherByAPI()
+      if (res.code === '200') {
+        this.hum = res.now.humidity
+        this.temp = res.now.temp
+        switch (res.now.text) {
+          case '阴':
+            this.weather = 'Cloudy'
+            break
+          case '晴':
+            this.weather = 'Sun'
+            break
+          case '雨':
+            this.weather = 'Rain'
+            break
+          case '雪':
+            this.weather = 'Snow'
+            break
+        }
+      }
+    },
     // 连接MQTT服务器
     MQTTConnect () {
       if (this.mqttInp == null || this.mqttInp === '') {
@@ -185,10 +215,40 @@ export default {
         }
       }
     },
+    useGyroscope () {
+      if (window.DeviceOrientationEvent) {
+        if (!this.isgyro) {
+          this.isgyro = true
+          this.$message.warning('陀螺仪控制已开启')
+          window.addEventListener('deviceorientation', this.gyrocopeCam, false)
+        } else {
+          this.isgyro = false
+          this.$message.warning('陀螺仪控制已关闭')
+          window.removeEventListener('deviceorientation', this.gyrocopeCam, false)
+        }
+      } else {
+        this.$message.warning('你的浏览器不支持陀螺仪')
+      }
+    },
+    async gyrocopeCam (event) {
+      let alpha = event.alpha
+      let beta = event.beta
+      // let gamma = event.gamma
+      this.alpha = alpha
+      if ((alpha < 270 && alpha > 90) || (beta > 90 && beta < -90)) return
+      if (alpha >= 270) alpha = Math.round(450 - alpha)
+      if (alpha <= 90) alpha = Math.round(90 - alpha)
+      beta = Math.round(90 + beta)
+      const hardwareIP = window.localStorage.getItem('hardwareIP')
+      const { data: res } = await gyrocopeControl(hardwareIP, alpha, beta)
+      console.log(res)
+    },
     async hardwareLoad () {
       const { data: res } = await getHardwareList()
       this.hardwareLength = res.data.length
-      const HardwareList = res.data
+      let HardwareList = res.data
+      // 过滤禁用的硬件
+      HardwareList = HardwareList.filter(o => o.status)
       const pattern1 = /^AGSW/
       const pattern2 = /^SPSW/
       this.AnaList = HardwareList.filter((o) => pattern1.test(o.hardwareId))
@@ -203,9 +263,6 @@ export default {
       this.$refs.stateA[k].innerHTML = 'Open'
       if (barBoxDisplay === 'none') {
         this.$refs.barBox[k].style.display = 'block'
-        if (this.AnaList[k].hardwareId === 'AGSW11' && this.AnaList[k].name.substring(0, 3) === 'cam') {
-          this.videoShow = true
-        }
         barIn.onchange = function () {
           indicator.innerHTML = barIn.value + '%'
           indicator.style.marginLeft = barIn.value + '%'
@@ -221,9 +278,6 @@ export default {
       } else {
         this.$refs.barBox[k].style.display = 'none'
         this.$refs.stateA[k].innerHTML = 'Close'
-        if (this.AnaList[k].hardwareId === 'AGSW11') {
-          this.videoShow = false
-        }
         barIn.removeEventListener('change', barIn)
         barIn.removeEventListener('touchmove', barIn)
       }
@@ -231,7 +285,19 @@ export default {
     // 模拟控制硬件简单控制
     AnaSwitch (k, ins) {
       this.AnaGet(k, ins)
-      ins === 'open' ? (this.$refs.stateA[k].innerHTML = 'Open') : (this.$refs.stateA[k].innerHTML = 'Close')
+      let timeOut = null
+      if (ins === 'open') {
+        this.$refs.stateA[k].innerHTML = 'Open'
+        this.videoShow = true
+        timeOut = setTimeout(() => {
+          const videoIP = window.localStorage.getItem('videoIP')
+          this.$refs.iframeRef.src = videoIP
+        }, 300)
+      } else {
+        clearTimeout(timeOut)
+        this.$refs.stateA[k].innerHTML = 'Close'
+        this.videoShow = false
+      }
       // console.log(this.AnaList[k].hardwareId.substring(4))
     },
     async AnaGet (k, ins, pwm = 0) {
@@ -280,22 +346,34 @@ export default {
   height: 400px;
   max-width: 100%;
   position: fixed;
-  top: 0%;
+  top: 10%;
   left: 50%;
   transform: translate(-50%, -20%);
   z-index: 66;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  overflow: scroll;
   #iframeVideo {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    transform: scale(0.9) rotate(-90deg) translateY(0%);
+    // transform: rotate(-90deg) translateY(0%);
   }
 }
-
+#use-gyroscope {
+  width: 90px;
+  height: 30px;
+  position: fixed;
+  right: 5%;
+  top: 3%;
+  background: rgba(240, 244, 245, 1);
+  z-index: 666;
+  border-radius: 6px;
+  color: rgba(51, 51, 51, 0.6);
+  font-size: 14px;
+  text-align: center;
+}
 .state {
   display: inline-block;
 }

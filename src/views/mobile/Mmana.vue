@@ -382,7 +382,7 @@ export default {
         cancelButtonText: '取消'
       })
         .then(async () => {
-          const { data: res } = await putChangeHardwareStatus(this.formDataAlter.hardwarePortd, that.HardwareList[k].status)
+          const { data: res } = await putChangeHardwareStatus(that.HardwareList[k].id, that.HardwareList[k].status)
           if (res.data === true) {
             that.$message.success('修改成功')
             that.hardwareLoad()
