@@ -93,7 +93,7 @@
 
 <script>
 import { getUserList } from '@/API/userAPI.js'
-import { getHardwareList, AGSWControl, SPSWControl, getWeatherByAPI } from '@/API/hardwareAPI.js'
+import { getHardwareList, AGSWControl, SPSWControl, getWeatherByAPI, sendToMQTT } from '@/API/hardwareAPI.js'
 export default {
   data: function () {
     return {
@@ -117,7 +117,10 @@ export default {
   },
   methods: {
     async getWeatherNow () {
+      const hIP = localStorage.getItem('hardwareIP') // 读取函数
       const { data: res } = await getWeatherByAPI()
+      const { data: result } = await sendToMQTT(hIP)
+      console.log(result)
       if (res.code === '200') {
         this.hum = res.now.humidity
         this.temp = res.now.temp
@@ -214,8 +217,6 @@ export default {
       } else {
         json.num = 'motor'
       }
-      // json = JSON.stringify(json)
-      console.log(json, hIP, num)
       const { data: res } = await SPSWControl(hIP, num, json)
       console.log(res)
       this.$message.success(this.SpList[k].name + '操作成功')

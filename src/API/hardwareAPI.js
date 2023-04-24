@@ -78,3 +78,8 @@ export const gyrocopeControl = (hIP, alpha, beta) => {
 export const getWeatherByAPI = () => {
   return request.get('https://devapi.qweather.com/v7/weather/now?key=7d245d09fd5c4723a8f1c16379c3c57c&location=101300112')
 }
+
+// 发送数据到MQTT服务器
+export const sendToMQTT = (hIP) => {
+  return request.get(hIP + '/htData')
+}
